@@ -1,4 +1,5 @@
 # import cups
+import time
 import cups
 import pexpect
 from prt_exceptions import PrtSetupException
@@ -10,9 +11,9 @@ class HpPrinter():
 
     @staticmethod
     def setup(connection_type="usb"):
-        log_file = open("/tmp/hp_setup.log")
+        log_file = open("/tmp/hp_setup.log",'w')
         cmd = 'hp-setup -i'
-        child = pexpect.spawn(cmd)
+        child = pexpect.spawnu(cmd)
         try:
             child.logfile = log_file
 
