@@ -1,24 +1,19 @@
-# coding: utf-8                                                                                                                                                                                              
-                               
+# coding: utf-8
+
 import sys
 from setuptools import setup, find_packages
-import ast                     
-import re                      
-  
-_version_re = re.compile(r'__version__\s+=\s+(.*)')
-  
-with open('prt/__init__.py', 'rb') as f:
-    version = str(ast.literal_eval(_version_re.search(
-        f.read().decode('utf-8')).group(1)))
-  
-with open('README.md') as f:  
+import ast
+import re
+
+
+with open('README.md') as f:
     long_description = f.read()
-  
+
 with open('requirements.txt') as f:
     requires = f.read()
- 
- 
-setup(name='jprt', version=version,
+
+
+setup(name='jprt', version="0.0.1",
       long_description=long_description,
       packages=find_packages(),
       include_package_data=True,
