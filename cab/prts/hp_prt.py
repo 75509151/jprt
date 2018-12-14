@@ -1,6 +1,4 @@
-# import cups
 import time
-import cups
 import pexpect
 from prt_exceptions import PrtSetupException
 
