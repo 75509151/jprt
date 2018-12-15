@@ -1,7 +1,6 @@
-import cups
+import magic
 
-def get_printers():
-    conn = cups.Connection()
-    return conn
-
+def get_mimetype(file_name):
+    mime = magic.Magic(mime=True)
+    return mime.from_file(file_name)
 

@@ -7,9 +7,9 @@ import struct
 import os
 import codecs
 import json
-import urllib2
 import platform
-from ConfigParser import ConfigParser
+from urllib.request import urlopen
+from configparser import ConfigParser
 
 
 
@@ -131,7 +131,6 @@ def get_eth_ip():
     try:
         ifname = os.popen(
             "/sbin/ifconfig |grep eth|awk '{print $1}'").read().split('\n')
-        print ifname
         for eth in ifname:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -149,8 +148,9 @@ def get_eth_ip():
 
 
 def get_external_ip():
+    GET_IP_API = "myip.ipip.net"
     try:
-        f = urllib2.urlopen(GET_IP_API, timeout=15)
+        f =urlopen(GET_IP_API, timeout=15)
         ip = json.loads(f.read())
         return ip
     except:
@@ -161,7 +161,7 @@ def get_ifname():
     # interface name must be start with 'e'
     ifname_list = os.popen(
         "/sbin/ifconfig |grep '^e'|awk '{print $1}'").read().split('\n')
-    print ifname_list
+    print (ifname_list)
     for ifname in ifname_list:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -280,7 +280,7 @@ def get_config(config_type):
         config_file = os.path.join(
             get_machine_home(), "machine", "config", "simulator.ini")
     else:
-        raise Exception, "invalid config_type: %s" % config_type
+        raise Exception("invalid config_type: %s" % config_type)
     config = ConfigParser()
     config.read(config_file)
     return config
