@@ -1,4 +1,5 @@
 import threading
+import uuid
 
 import magic
 
@@ -13,3 +14,7 @@ def run_in_thread(fn):
         t.start()
         return t
     return run
+
+
+def get_db_uuid():
+    return str(uuid.uuid4())
