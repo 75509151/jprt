@@ -1,3 +1,4 @@
+import os
 import time
 import pexpect
 
@@ -9,7 +10,9 @@ from cab.utils.console import embed
 from cab.utils.utils import get_mimetype
 from cab.utils.c_log import init_log
 from cab.prts.prt_exceptions import (PrtSetupException,
-       DeviceNotFoundExcetion)
+       DeviceNotFoundExcetion,
+       PrtPrintException)
+from cab.prts import office
 
 log = init_log("prt")
 
@@ -52,11 +55,25 @@ class HpPrinter():
     def close(self):
         self.dev.close()
 
-    def print_file(self, file_name, remove=True):
-        if get_mimetype(file_name) != "application/msword": 
-            self.dev.printFile(file_name, self.printer_name, raw=False, remove=remove)
+    def print_file(self, document, options='', remove=False):
+        """黑白彩色，单双面，份数 """
+        if not os.path.isfile(document):
+            raise Exception("not file")
+
+        if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"): 
+            log.info("office")
+            if office.print_file(document, printer_name):
+                raise PrtPrintException("print file error")
+
         else:
-            raise Exception("Not implete")
+            log.info("not office")
+            cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.printer_name, document) 
+            if os.system(cmd) != 0:
+                raise PrtPrintException("print file error")
+
+        if remove:
+            os.system("rm %s" % document)
+
         
 
     @staticmethod

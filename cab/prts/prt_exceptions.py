@@ -3,3 +3,7 @@ class PrtSetupException(Exception):
 
 class DeviceNotFoundExcetion(Exception):
     """DeviceNot Found"""
+
+class PrtPrintException(Exception):
+    """call print failed"""
+
