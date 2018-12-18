@@ -2,3 +2,4 @@ pexpect
 autopep8
 pylint
 python-magic
+requests
