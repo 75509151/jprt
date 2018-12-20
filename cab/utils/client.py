@@ -36,7 +36,7 @@ class Client(object):
 
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
         if self.sock in fd_in:
-            data = self.sock.recv(8192)
+            data = self.sock.recv(80960)
             self.log.info("recv: %s" % data)
             return data
         return None

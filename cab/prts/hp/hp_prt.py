@@ -9,18 +9,19 @@ from prnt import cups
 from cab.utils.console import embed
 from cab.utils.utils import get_mimetype
 from cab.utils.c_log import init_log
-from cab.prts.prt_exceptions import (PrtSetupException,
-       DeviceNotFoundExcetion,
-       PrtPrintException)
+from cab.prts.prt_exceptions import (PrtSetupError,
+                                     DeviceNotFoundError,
+                                     PrtPrintError)
 from cab.prts import office
 
 log = init_log("prt")
 
+
 class HpPrinter():
 
     def __init__(self, device_uri=None, printer_name=None):
-        self.printer_name = printer_name 
-        self.device_uri = device_uri 
+        self.printer_name = printer_name
+        self.device_uri = device_uri
         self.dev = None
 
         if self.printer_name and not self.device_uri:
@@ -33,22 +34,20 @@ class HpPrinter():
             if printer:
                 self.printer_name = printer.name
                 self.device_uri = printer.device_uri
-        
+
         try:
             self._init_device()
         except Exception as e:
-            log.waring(str(e))
+            log.warning(str(e))
 
         log.info("hp")
 
-
     def _init_device(self):
         if not self.device_uri:
-            raise DeviceNotFoundException("device_uri miss")
+            raise DeviceNotFoundError("device_uri miss")
 
         self.dev = device.Device(self.device_uri)
-     
-    
+
     def open(self):
         self.dev.open()
 
@@ -60,25 +59,23 @@ class HpPrinter():
         if not os.path.isfile(document):
             raise Exception("not file")
 
-        if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"): 
+        if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
             log.info("office")
-            if office.print_file(document, printer_name):
-                raise PrtPrintException("print file error")
+            if office.print_file(document, self.printer_name):
+                raise PrtPrintError("print file error")
 
         else:
             log.info("not office")
-            cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.printer_name, document) 
+            cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.printer_name, document)
             if os.system(cmd) != 0:
-                raise PrtPrintException("print file error")
+                raise PrtPrintError("print file error")
 
         if remove:
             os.system("rm %s" % document)
 
-        
-
     @staticmethod
     def setup(connection_type="usb"):
-        log_file = open("/tmp/hp_setup.log",'w')
+        log_file = open("/tmp/hp_setup.log", 'w')
         cmd = 'hp-setup -i'
         child = pexpect.spawnu(cmd)
         try:
@@ -89,42 +86,42 @@ class HpPrinter():
                 time.sleep(0.1)
                 child.sendline("0")
             else:
-                raise PrtSetupException("error when choose connection type")
+                raise PrtSetupError("error when choose connection type")
 
             ind = child.expect(["use model name", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
                 child.sendline()
             else:
-                raise PrtSetupException("error when choose model name")
+                raise PrtSetupError("error when choose model name")
 
             ind = child.expect(["be the correct one", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
                 child.sendline("y")
             else:
-                raise PrtSetupException("error when choose ppd")
+                raise PrtSetupError("error when choose ppd")
 
             ind = child.expect(["description for this printer", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
                 child.sendline()
             else:
-                raise PrtSetupException("error when add description")
+                raise PrtSetupError("error when add description")
 
             ind = child.expect(["information or notes for this printer", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
                 child.sendline()
             else:
-                raise PrtSetupException("error when add information")
+                raise PrtSetupError("error when add information")
 
             ind = child.expect(["print a test page", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
                 child.sendline("y")
             else:
-                raise PrtSetupException("error when choose ppd")
+                raise PrtSetupError("error when choose ppd")
 
             child.expect([pexpect.EOF, pexpect.TIMEOUT])
         finally:

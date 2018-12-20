@@ -1,9 +1,9 @@
-class PrtSetupException(Exception):
+class PrtSetupError(Exception):
     """PrtSetup Error"""
 
-class DeviceNotFoundExcetion(Exception):
+class DeviceNotFoundError(Exception):
     """DeviceNot Found"""
 
-class PrtPrintException(Exception):
+class PrtPrintError(Exception):
     """call print failed"""
 
