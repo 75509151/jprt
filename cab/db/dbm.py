@@ -6,9 +6,6 @@ from cab.utils.c_log import init_log
 
 __all__ = ["get_db_instance"]
 
-_config = get_config("ckc")
-_ckc_db_path = _config.get("db", "ckc_db")
-_sync_db_path = _config.get("db", "sync_db")
 
 
 log = init_log("db")
@@ -18,21 +15,21 @@ def get_db_instance():
 
 class DB(object):
 
-    def __init__(self, ckc_db_path=_ckc_db_path, sync_db_path=_sync_db_path):
+    def __init__(self, ckc_db_path=None, sync_db_path=None):
         self.config = get_config("ckc")
-        self.ckc_db_path = ckc_db_path
-        self.sync_db_path = sync_db_path
-        self._open_db(ckc_db_path, sync_db_path)
+        self.ckc_db_path = ckc_db_path if ckc_db_path else self.config.get("db", "ckc_db")
+        self.sync_db_path = sync_db_path if sync_db_path else self.config.get("db", "sync_db")
+        self._open_db()
 
     def __del__(self):
         self._close_db()
 
-    def _open_db(self, ckc_db_path, sync_db_path):
+    def _open_db(self) :
         self.conn = sqlite3.connect(
-            ckc_db_path, isolation_level="IMMEDIATE", timeout=60, check_same_thread=False)
+            self.ckc_db_path, isolation_level="IMMEDIATE", timeout=60, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.sync_conn = sqlite3.connect(
-            sync_db_path, isolation_level="IMMEDIATE", timeout=60, check_same_thread=False)
+            self.sync_db_path, isolation_level="IMMEDIATE", timeout=60, check_same_thread=False)
         self.sync_cursor = self.sync_conn.cursor()
 
     def _close_db(self):
@@ -89,13 +86,13 @@ class DB(object):
         """ add new info or config & sync to server
 
         @param table: str, machine_info or machine_config
-        @param add_list: list(tuple), [(id, client_id, machine_id, key, value, time), ...]
+        @param add_list: list(tuple), [(id, machine_id, key, value, time), ...]
         @param sync: bool, need sync to server?
         @return: None
         """
         try:
-            sql = "INSERT INTO %s(id, client_id, machine_id, key, value, last_update_time) " \
-                  "VALUES(?, ?, ?, ?, ?, ?);" % table
+            sql = "INSERT INTO %s(id, machine_id, key, value, last_update_time) " \
+                  "VALUES(?, ?, ?, ?, ?);" % table
             self.cursor.executemany(sql, add_list)
             if sync:
                 pass

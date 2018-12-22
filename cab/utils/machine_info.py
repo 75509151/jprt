@@ -18,14 +18,6 @@ def get_machine_type(real=False):
     g_machine_type = get_file_content(
         get_machine_home() + ".machineconfig/machine_type")
 
-    if not real:
-        if g_machine_type in ("q0", "m0"):
-            g_machine_type = "m0"
-        if g_machine_type in ("m1", "m1d", "m1s"):
-            g_machine_type = "m1"
-        elif g_machine_type in ("r2s", "r2sd", "r2f"):
-            g_machine_type = "r2"
-
     return g_machine_type
 
 
@@ -78,14 +70,6 @@ def set_machine_location(machine_location):
                      ".machineconfig/machine_location", machine_location)
 
 
-def get_client_id():
-    return get_file_content(get_machine_home() + ".machineconfig/client_id")
-
-
-def set_client_id(client_id):
-    set_file_content(get_machine_home() + ".machineconfig/client_id", client_id)
-
-
 def set_machine_server(machine_type, default_server=""):
     set_file_content(get_machine_home() + ".machineconfig/machine_" +
                      machine_type + "_server", default_server)
@@ -96,7 +80,7 @@ def get_machine_server(s_type, default_serve=""):
     :param s_type: api, access, update
     :return: ser
     """
-    ser = get_file_content("/home/mm/.machineconfig/machine_" + s_type + "_server")
+    ser = get_file_content("/home/pi/.machineconfig/machine_" + s_type + "_server")
     if not ser:
         set_machine_server(s_type, default_serve)
         ser = default_serve
@@ -104,17 +88,17 @@ def get_machine_server(s_type, default_serve=""):
 
 
 def get_machine_home():
-    return get_file_content("/home/mm/.machineconfig/machine_home")
+    return get_file_content("/home/pi/.machineconfig/machine_home")
 
 
 def get_ckc_version():
     """ get the machine version
     """
-    return get_file_content("/home/mm/.machineconfig/latest_version")
+    return get_file_content("/home/pi/.machineconfig/latest_version")
 
 
 def get_ckc_upgrade_time():
-    return get_file_content("/home/mm/.machineconfig/upgrade_time")
+    return get_file_content("/home/pi/.machineconfig/upgrade_time")
 
 
 def get_timezone():
@@ -198,20 +182,6 @@ def get_cur_time(time_fmt="%Y-%m-%d %H:%M:%S"):
 def get_cur_utctime(time_fmt="%Y-%m-%d %H:%M:%S"):
     return datetime.datetime.utcnow().strftime(time_fmt)
 
-
-def get_machine_version_lock():
-    """
-    Get the update version lock for reseaons.
-    @return: The version number string format or False.
-    """
-    try:
-        with open(get_machine_home() + '/.machineconfig/version_lock', 'r') as f:
-            version_lock = f.read().strip()
-    except:
-        version_lock = False
-    return version_lock
-
-
 def get_active_information():
     information = ""
     try:
@@ -226,59 +196,12 @@ def set_active_information(active_information=""):
     with open(get_machine_home() + '/.machineconfig/.active_information', "wb") as fd:
         fd.write(active_information)
 
-
-def set_download_lock(lock="False"):
-    with open(get_machine_home() + '/.machineconfig/.download_lock', "wb") as fd:
-        fd.write(lock)
-
-
-def get_download_status():
-    try:
-        with open(get_machine_home() + '/.machineconfig/.download_lock', 'r') as f:
-            s = f.read().strip().split(',')
-            lock = s[0]
-            if not lock:
-                lock = "False"
-            last_download_time = s[1]
-            if int(time.time()) - int(last_download_time) > 60 * 30:
-                lock = "False"
-    except:
-        lock = "False"
-    return lock
-
-
-def set_card_present_flag(present):
-    """ set the card present flag to a file
-    """
-    file_path = os.path.join(get_machine_home(), "var", "card_reader_error")
-    with open(file_path, 'w') as f:
-        f.write(present)
-
-
-def get_card_present_flag():
-    """ get the card present flag from a file
-    """
-    file_path = os.path.join(get_machine_home(), "var", "card_reader_error")
-    if not os.path.exists(file_path):
-        flag = ""
-    else:
-        with open(file_path, 'r') as f:
-            flag = f.read().strip()
-    return flag
-
-
 def get_config(config_type):
     """
     """
     if config_type == "ckc":
         config_file = os.path.join(
-            get_machine_home(), "machine", "config", "ckc.ini")
-    elif config_type == "gui":
-        config_file = os.path.join(
-            get_machine_home(), "machine", "config", "gui.ini")
-    elif config_type == "simulator":
-        config_file = os.path.join(
-            get_machine_home(), "machine", "config", "simulator.ini")
+            get_machine_home(), "jprt","cab", "config", "config.ini")
     else:
         raise Exception("invalid config_type: %s" % config_type)
     config = ConfigParser()

@@ -1,28 +1,9 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-"""
-Cereson Kiosk Core V4.0
-CopyRight Cereson, Inc.
-
-Created 2013-01-29 Kitch
-
-Filename: verify_db.py
-DB validation
-
-Change Log:
-"""
-
-__version__ = "0.1.0"
-
-# =================================================================
-# Import
-# -----------------------------------------------------------------
 import os
 import re
 import json
-import sqlite3 as sqlite
+import sqlite3
 from cab.utils.c_log import init_log
-from cab.utils.machine_info import get_machine_id, get_client_id, \
+from cab.utils.machine_info import get_machine_id, \
     get_cur_time, get_config, \
     get_ckc_version
 from cab.utils.utils import get_db_uuid
@@ -196,7 +177,7 @@ class SchemaTools():
 class CkcDb():
 
     def __init__(self, ckc_db_path, sync_db_path):
-        self.con = sqlite.connect(
+        self.con = sqlite3.connect(
             ckc_db_path, isolation_level="IMMEDIATE", timeout=5.0)
         self.cur = self.con.cursor()
         self.db = DB(ckc_db_path, sync_db_path)
@@ -215,7 +196,6 @@ class CkcDb():
 (
     id_ai INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     id TEXT,
-    client_id TEXT DEFAULT '',
     machine_id TEXT,
     key TEXT UNIQUE NOT NULL,
     value TEXT DEFAULT '',
@@ -228,7 +208,6 @@ class CkcDb():
 (
     id_ai INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     id TEXT,
-    client_id TEXT DEFAULT '',
     machine_id TEXT,
     key TEXT UNIQUE NOT NULL,
     value TEXT DEFAULT '',
@@ -242,7 +221,6 @@ class CkcDb():
 (
     id_ai INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     id TEXT,
-    client_id TEXT DEFAULT '',
     machine_id TEXT,
     machine_name TEXT DEFAULT '',
     event_type TEXT,
@@ -317,24 +295,16 @@ class CkcDb():
         infos.append(("timezone", ""))
         infos.append(("start_time", ""))
         infos.append(("printer_status", ""))
-        infos.append(("available_group", "[]"))
-        infos.append(("current_temperature", ""))
-        infos.append(("pos_status", ""))
-        infos.append(("scanner_status", ""))
-        infos.append(("cash_aus_status", ""))
-        infos.append(("yichu_region_status", ""))
-        infos.append(("last_rotate_time", get_cur_time()))
         infos.append(("inactive_reason", ""))
 
         # verify
-        client_id = get_client_id()
         machine_id = get_machine_id()
         now = get_cur_time()
         add_list = []
         for info in infos:
             if info[0] not in c_info:
                 _id = get_db_uuid()
-                param = (_id, client_id, machine_id, info[0], info[1], now)
+                param = (_id, machine_id, info[0], info[1], now)
                 add_list.append(param)
 
         if add_list:
@@ -351,14 +321,13 @@ class CkcDb():
         configs = []
         configs.append(("general_policy", "{}"))
         # verify
-        client_id = get_client_id()
         machine_id = get_machine_id()
         now = get_cur_time()
         add_list = []
         for config in configs:
             if config[0] not in c_config:
                 _id = get_db_uuid()
-                param = (_id, client_id, machine_id, config[0], config[1], now)
+                param = (_id, machine_id, config[0], config[1], now)
                 add_list.append(param)
 
         if add_list:
@@ -368,7 +337,7 @@ class CkcDb():
 class SyncDb:
 
     def __init__(self, sync_db_path):
-        self.con = sqlite.connect(
+        self.con = sqlite3.connect(
             sync_db_path, isolation_level="IMMEDIATE", timeout=5.0)
         self.cur = self.con.cursor()
 
