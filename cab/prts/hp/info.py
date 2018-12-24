@@ -65,6 +65,8 @@ try:
     device_uri = mod.getDeviceUri(device_uri, printer_name, restrict_to_installed_devices=restrict)
 
     if not device_uri:
+        print("not device_uri")
+        log.debug("not device_uri")
         sys.exit(1)
 
     try:

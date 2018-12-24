@@ -20,20 +20,18 @@ log = init_log("prt")
 class HpPrinter():
 
     def __init__(self, device_uri=None, printer_name=None):
-        self.printer_name = printer_name
-        self.device_uri = device_uri
+        self.printer_name = None
+        self.device_uri = None
         self.dev = None
 
-        if self.printer_name and not self.device_uri:
-            self.device_uri = device.getDeviceURIByPrinterName(self.printer_name)
-
-        if not self.printer_name and not self.device_uri:
-            printers = cups.getPrinters()
-            printer = printers[0] if printers else None
-
-            if printer:
+        hp_printers = device.getSupportedCUPSPrinters()
+        for printer in hp_printers:
+            if (device_uri is None and printer_name is None) or \
+                    (device_uri and device_uri == printer.device_uri) or\
+                    (printer_name and printer.name):
                 self.printer_name = printer.name
                 self.device_uri = printer.device_uri
+                break
 
         try:
             self._init_device()
@@ -84,7 +82,13 @@ class HpPrinter():
             ind = child.expect(["enter=usb*", pexpect.TIMEOUT])
             if ind == 0:
                 time.sleep(0.1)
-                child.sendline("0")
+                if connection_type == "usb":
+                    type_ind = "0"
+                else:
+                    #TODO 
+                    type_ind = "1"
+
+                child.sendline(type_ind)
             else:
                 raise PrtSetupError("error when choose connection type")
 

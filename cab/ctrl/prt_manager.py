@@ -1,22 +1,28 @@
+import json
+
+from prnt import cups
+
+from cab.db.db_pool import DB_POOL
+from cab.prts.printer import get_register_printer_info
+from cab.prts.hp.hp_prt import HpPrinter
+
 
 
 class PrtManager(object):
     def __init__(self):
-        pass
+        self.printer_info = get_register_printer_info()
+        self.printer = HpPrinter()
 
-    def get_printer(self):
-        pass
+
 
     def check_printer(self):
-        self._check_and_install()
-        self._check_and_report_params()
         self.check_and_report_status()
 
 
-    def _check_and_install(self):
+    def install_printer(self):
         pass
 
-    def _check_and_report_params(self):
+    def report_printer_params(self):
         pass
 
     def check_and_report_status(self):
