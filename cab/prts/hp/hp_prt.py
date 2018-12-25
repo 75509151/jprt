@@ -19,17 +19,17 @@ log = init_log("prt")
 
 class HpPrinter():
 
-    def __init__(self, device_uri=None, printer_name=None):
-        self.printer_name = None
+    def __init__(self, device_uri=None, name=None):
+        self.name = None
         self.device_uri = None
         self.dev = None
 
-        hp_printers = device.getSupportedCUPSPrinters()
+        hp_printers = device.getSupportedCUPSPrinters(["hp"])
         for printer in hp_printers:
-            if (device_uri is None and printer_name is None) or \
+            if (device_uri is None and name is None) or \
                     (device_uri and device_uri == printer.device_uri) or\
-                    (printer_name and printer.name):
-                self.printer_name = printer.name
+                    (name and printer.name==name):
+                self.name = printer.name
                 self.device_uri = printer.device_uri
                 break
 
@@ -49,6 +49,18 @@ class HpPrinter():
     def open(self):
         self.dev.open()
 
+
+    def get_status(self):
+        self.open()
+        self.dev.queryDevice()
+        return self.dev.dq
+
+    def get_params(self):
+        self.open()
+        self.dev.queryDevice()
+        return self.dev.mq
+
+
     def close(self):
         self.dev.close()
 
@@ -59,12 +71,12 @@ class HpPrinter():
 
         if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
             log.info("office")
-            if office.print_file(document, self.printer_name):
+            if office.print_file(document, self.name):
                 raise PrtPrintError("print file error")
 
         else:
             log.info("not office")
-            cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.printer_name, document)
+            cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.name, document)
             if os.system(cmd) != 0:
                 raise PrtPrintError("print file error")
 
