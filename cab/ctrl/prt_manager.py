@@ -5,11 +5,10 @@ from base import device
 
 from cab.utils.c_log import init_log
 from cab.db.db_pool import DB_POOL
-from cab.prts.printer import get_register_printer_info
 from cab.prts.hp.hp_prt import HpPrinter
 from cab.prts.prt_exceptions import PrtSetupError
 
-
+log = init_log("prt_manager")
 
 class PrtManager(object):
     def __init__(self):
@@ -25,15 +24,15 @@ class PrtManager(object):
         if not exist_uris:
             return False
 
-        if not self.printer.device_uri and exist_uris:
+        if not self.printer.device_uri:
+            log.info("need new install: %s" % exist_uris)
             return True
-        
+
         if self.printer.device_uri not in exist_uris and self.printer.dev is None:
+            log.info("need install for other: %s" % exist_uris)
             return True
 
         return False
-
-
 
     def install_printer(self):
         try:
@@ -43,16 +42,16 @@ class PrtManager(object):
         except PrtSetupError as e:
             log.warning("install printer failed: %s" % str(e))
 
-    def report_printer_params(self):
+    def report_params(self):
         params = self.printer.get_params()
+        print("params: %s" % params)
 
-
-    def check_and_report_status(self):
+    def report_status(self):
         status = self.printer.get_status()
+        print("status: %s" % status)
 
     def print_file(self, document):
         pass
-    
 
     def report_print_result(self):
         pass
@@ -64,16 +63,14 @@ class PrtManager(object):
         else:
             pass
             # if self.need_install():
-                # self.install_printer()
-
-
-
-
+            # self.install_printer()
 
 
 if __name__ == "__main__":
     manager = PrtManager()
     if manager.need_install():
         manager.install_printer()
-
-
+        manager.report_params()
+    else:
+        print("not need install")
+    manager.report_status()
