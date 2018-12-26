@@ -44,6 +44,7 @@ class HpPrinter():
         if not self.device_uri:
             raise DeviceNotFoundError("device_uri miss")
 
+        print(self.device_uri)
         self.dev = device.Device(self.device_uri)
 
     def open(self):

@@ -1,4 +1,5 @@
 import json
+import pudb
 
 from prnt import cups
 from base import device
@@ -67,6 +68,7 @@ class PrtManager(object):
 
 
 if __name__ == "__main__":
+    pudb.set_trace()
     manager = PrtManager()
     if manager.need_install():
         manager.install_printer()
