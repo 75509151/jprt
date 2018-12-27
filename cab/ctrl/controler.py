@@ -63,7 +63,7 @@ class Controler(object):
                     try:
                         self.prt_manager.open()
                     except Exception as e:
-                        log.waring(str(e))
+                        log.warning(str(e))
 
         except Exception as e:
             log.error("exit unexpect: %s" % str(traceback.format_exc()))
