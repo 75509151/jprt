@@ -6,7 +6,7 @@ import signal
 
 from cab.utils.server import Server, run_server
 from cab.utils.c_log import init_log
-from cab.utils.console import embed 
+from cab.utils.console import embed
 from cab.utils import constant as cst
 from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
@@ -43,7 +43,7 @@ class Controler(object):
             self.prt_manager.report_params()
             self.prt_manager.report_status()
         except Exception as e:
-            log.warning(str(traceback.format_exec()))
+            log.warning(str(traceback.format_exc()))
 
 
     def run(self, test=False):
@@ -74,5 +74,5 @@ if __name__ == "__main__":
     ctrl = Controler()
     test =True if len(sys.argv) >= 2 and sys.argv[1] == "test" else False
     ctrl.run(test)
-    
+
 
