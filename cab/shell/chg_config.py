@@ -1,20 +1,12 @@
 #!/home/mm/.pyenv/shims/python
 
-"""
-Created on 2012-11-20
-
-@author: khuang
-
-Change Log:
-    2013-05-30 Tim Change for h1
-"""
 
 import os
 import time
 from optparse import OptionParser
-from cutils.c_log import init_log
-from cutils.kioskinfo import get_kiosk_id
-from db.dbm import get_db_instance
+from cab.utils.c_log import init_log
+from cab.utils.machine_info import get_machine_id
+from cab.db.dbm import get_db_instance
 
 log = init_log("change_config")
 
@@ -33,43 +25,43 @@ def change_config(key, value):
             if key in keys:
                 list_all = False
                 select_id = keys.index(key)
-                confirm = raw_input("Are your sure to change config(%s) to %s? y/N: " % (key, value))
+                confirm = input("Are your sure to change config(%s) to %s? y/N: " % (key, value))
                 if confirm.lower() not in ("y", "yes"):
                     os.abort()
             else:
-                print "Invalid Key:", key
-                print "All configs will be listed in 2 seconds..."
+                print ("Invalid Key:", key)
+                print ("All configs will be listed in 2 seconds...")
                 time.sleep(2)
 
         if list_all:
-            print "All configs..."
-            print "\033[1;32m%s\033[0m" % ("%-4s%-30s%s" % ("ID", "Key", "Value"))
+            print ("All configs...")
+            print ("\033[1;32m%s\033[0m" % ("%-4s%-30s%s" % ("ID", "Key", "Value")))
             ids = range(len(configs))
             for i in ids:
-                print "%-4s%-30s%s" % (i, configs[i][1], configs[i][2])
+                print ("%-4s%-30s%s" % (i, configs[i][1], configs[i][2]))
 
-            select_id = raw_input("Please input the config ID which to be changed: ")
+            select_id = input("Please input the config ID which to be changed: ")
             try:
                 select_id = int(select_id)
             except ValueError:
-                print 'DoNOT test me!! I am NOT baby!'
-                print 'I just need a number'
+                print ('DoNOT test me!! I am NOT baby!')
+                print ('I just need a number')
                 os.abort()
 
             if select_id not in ids:
-                print 'The number is out of my range!'
+                print ('The number is out of my range!')
                 os.abort()
 
             key = configs[select_id][1]
-            print "The old value of config(%s) is: %s." % (key, configs[select_id][2])
-            value = raw_input("Please input the new value: ")
+            print ("The old value of config(%s) is: %s." % (key, configs[select_id][2]))
+            value = input("Please input the new value: ")
 
         db.set_kv("machine_config", {key: value})
 
         msg = "Changed the config(%s) from %s to %s successfully." % (key, configs[select_id][2], value)
-        print msg
+        print (msg)
         log.info(msg)
-    except Exception, ex:
+    except Exception as ex:
         log.error("%s %s: %s" % (key, value, ex))
         raise
 

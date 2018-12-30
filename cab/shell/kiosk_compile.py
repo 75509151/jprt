@@ -1,11 +1,11 @@
 import compileall
-from cutils.kioskinfo import get_kiosk_home
 import os
 
+from cab.utils.machine_info import get_machine_home
 
 if __name__ == '__main__':
-    kiosk_path = os.path.join(get_kiosk_home(), "kiosk")
-    print "compile: %s" % kiosk_path
+    machine_path = os.path.join(get_machine_home(), "jprt")
+    print ("compile: %s" % machine_path)
 
-    compileall.compile_dir(kiosk_path, quiet=True)
-    print "compile end"
+    compileall.compile_dir(machine_path, quiet=True)
+    print ("compile end")
