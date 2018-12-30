@@ -4,3 +4,4 @@ python-magic
 requests
 pudb
 pylint
+click

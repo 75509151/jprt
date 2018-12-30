@@ -9,11 +9,8 @@ import os
 import time
 import sys
 
-from update_utils import (get_kiosk_downloaded_version,
-                          set_kiosk_downloaded_version,
-                          get_file_content,
-                          run_with_eat_exceptions)
-from project_download import VersionDownload
+from . import update_utils as upu 
+from . import project_download 
 from update_exceptions import ConfigException
 from update_info import (DOWNLOAD_INTERVAL_SEC, UPDATE_lOG, UPDATE_PWD_FILE,
                          TEST_SERVER, REAL_SERVER, REMOTE_UPDATE_BASE_DIR, REMOTE_VERSION)
@@ -33,7 +30,6 @@ class AutoDownloader(object):
         self.remote_version_file = REMOTE_VERSION
         self.initialize()
 
-    @run_with_eat_exceptions
     def _remove_kownhosts(self):
         os.system("rm ~/.ssh/known_hosts")
 
@@ -77,7 +73,7 @@ class AutoDownloader(object):
 
     def get_need_download_version(self):
         allow_version_info = self.get_remote_version_info()
-        downloaded_version = get_kiosk_downloaded_version()
+        downloaded_version = upu.get_machine_downloaded_version()
         allow_version = allow_version_info.get("version", "")
         update_day = allow_version_info.get("date", "")
         self.log.info("allow_version: %s downloaded_version: %s" %
@@ -94,7 +90,7 @@ class AutoDownloader(object):
             try:
                 need_download_version = self.get_need_download_version()
                 if need_download_version:
-                    downloader = VersionDownload(
+                    downloader = project_download.VersionDownload(
                         need_download_version, test=self.test)
                     downloader.download()
             except Exception as e:

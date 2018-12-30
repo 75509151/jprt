@@ -14,7 +14,7 @@ import codecs
 import fcntl
 import time
 
-from update_exceptions import *
+from . import update_exceptions as upex
 
 
 def check_and_creat_path(path):
@@ -24,7 +24,7 @@ def check_and_creat_path(path):
 
 def init_log():
     log = logging.getLogger('auto_update')
-    log_path = os.path.join("/home/mm/var/log")
+    log_path = os.path.join("/home/pi/var/log")
     check_and_creat_path(log_path)
     log_file = os.path.join(log_path, "update.log")
     handle = logging.FileHandler(log_file)
@@ -63,31 +63,16 @@ class ProcessLock():
             pass
 
 
-def run_with_eat_exceptions(func):
-    def wrap(*args, **kwargs):
-        ret = func(*args, **kwargs)
-        return ret
-    return wrap
-
-
 def change_working_path(path):
     os.chdir(path)
 
 
-def get_home_dir():
-    return get_kiosk_name()
 
 
-def cp_folder(source_path, dst_path, overwrite=True):
-    print "cp %s to %s" % (source_path, dst_path)
+def cp_folder(source_path, dst_path):
     if os.path.exists(dst_path):
-        print "dst path exist. delete it: %s" % dst_path
         shutil.rmtree(dst_path)
-    # os.makedirs(dst_path)
     shutil.copytree(source_path, dst_path)
-    # ret = os.system("cp -rf %s %s " % (source_path, dst_path))
-    # if ret:
-    #     raise Exception("cp folder failed")
 
 
 def get_recursive_file_list(path, only_file=True):
@@ -131,13 +116,13 @@ def get_bool_input():
     yes = set(['yes', 'y', 'y'])
     no = set(['no', 'n'])
     while True:
-        choice = raw_input().lower()
+        choice = input().lower()
         if choice in yes:
             return True
         elif choice in no:
             return False
         else:
-            print "Please respond with 'yes' or 'no'"
+            print ("Please respond with 'yes' or 'no'")
 
 
 def md5(fname):
@@ -149,22 +134,34 @@ def md5(fname):
 
 
 def do_cmd(cmd, raise_ex=True):
-    print "do cmd: %s" % cmd
     child = subprocess.Popen(
         cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     child.wait()
     out = child.stdout.read()
     err = child.stderr.read()
-    if raise_ex and (child.returncode or err):
-        raise CmdFailedExecetion("do cmd get unexpect result")
+    if raise_ex and child.returncode:
+        raise upex.CmdFailedExecetion("do cmd get unexpect result")
     return child.returncode, out, err
 
 
 def get_cur_time(time_fmt="%Y-%m-%d %H:%M:%S"):
     return time.strftime(time_fmt)
 
+def set_machine_downloaded_version(version):
+    from update_info import VERSION_DOWN
+    with open(VERSION_DOWN, "w") as f:
+        f.write(version)
 
-def set_ckc_version(ver):
+def get_machine_downloaded_version():
+    from update_info import VERSION_DOWN
+    if os.path.exists(VERSION_DOWN):
+        with open(VERSION_DOWN, 'r') as file:
+            content = file.readline().strip()
+        return content
+    else:
+        return ""
+
+def set_machine_version(ver):
     """
     set kiosk version
     """
@@ -174,23 +171,6 @@ def set_ckc_version(ver):
             f.write(ver)
         with open("/home/mm/.kioskconfig/upgrade_time", 'w') as ff:
             ff.write(get_cur_time())
-
-
-def set_kiosk_downloaded_version(version):
-    from update_info import VERSION_DOWN
-    with open(VERSION_DOWN, "w") as f:
-        f.write(version)
-
-
-def get_kiosk_downloaded_version():
-    from update_info import VERSION_DOWN
-    if os.path.exists(VERSION_DOWN):
-        with open(VERSION_DOWN, 'r') as file:
-            content = file.readline().strip()
-        return content
-    else:
-        return ""
-
 
 def get_sys_ver():
     with open("/etc/issue", 'r') as f:
@@ -214,78 +194,49 @@ def set_file_content(file_path, content):
         f.write(content)
 
 
-def get_kiosk_id():
-    return get_file_content(get_kiosk_home() + ".kioskconfig/kiosk_id")
+
+def get_machine_name():
+    return get_file_content(get_machine_home() + ".machineconfig/machine_name")
 
 
-def get_kiosk_payurl():
-    return get_file_content(get_kiosk_home() + ".kioskconfig/kiosk_payurl")
+def set_machine_name(machine_name):
+    set_file_content(get_machine_home() + ".machineconfig/machine_name", machine_name)
 
 
-def get_kiosk_type(real=False):
-    g_kiosk_type = get_file_content(
-        get_kiosk_home() + ".kioskconfig/kiosk_type")
-
-    if not real:
-        if g_kiosk_type in ["q0", "m0"]:
-            g_kiosk_type = "m0"
-        # if g_kiosk_type in ["m1", "l1"]:
-            # g_kiosk_type = "m1"
-        if g_kiosk_type in ["r2s", "r2sd"]:
-            g_kiosk_type = "r2"
-    return g_kiosk_type
+def get_machine_location():
+    return get_file_content(get_machine_home() + ".machineconfig/machine_location")
 
 
-def get_kiosk_name():
-    return get_file_content(get_kiosk_home() + ".kioskconfig/kiosk_name")
+def set_machine_location(machine_location):
+    set_file_content(get_machine_home() +
+                     ".machineconfig/machine_location", machine_location)
 
 
-def set_kiosk_name(kiosk_name):
-    set_file_content(get_kiosk_home() + ".kioskconfig/kiosk_name", kiosk_name)
+def set_machine_server(machine_type, default_server=""):
+    set_file_content(get_machine_home() + ".machineconfig/machine_" +
+                     machine_type + "_server", default_server)
 
 
-def get_kiosk_location():
-    return get_file_content(get_kiosk_home() + ".kioskconfig/kiosk_location")
-
-
-def set_kiosk_location(kiosk_location):
-    set_file_content(get_kiosk_home() +
-                     ".kioskconfig/kiosk_location", kiosk_location)
-
-
-def get_client_id():
-    return get_file_content(get_kiosk_home() + ".kioskconfig/client_id")
-
-
-def set_client_id(client_id):
-    set_file_content(get_kiosk_home() + ".kioskconfig/client_id", client_id)
-
-
-def set_kiosk_server(kiosk_type, default_server=""):
-    set_file_content(get_kiosk_home() + ".kioskconfig/kiosk_" +
-                     kiosk_type + "_server", default_server)
-
-
-def get_kiosk_server(s_type, default_serve=""):
+def get_machine_server(s_type, default_serve=""):
     """
     :param s_type: api, access, update
     :return: ser
     """
-    ser = get_file_content("/home/mm/.kioskconfig/kiosk_" + s_type + "_server")
+    ser = get_file_content("/home/mm/.machineconfig/machine_" + s_type + "_server")
     if not ser:
-        set_kiosk_server(s_type, default_serve)
+        set_machine_server(s_type, default_serve)
         ser = default_serve
     return ser
 
 
-def get_kiosk_home():
-    return get_file_content("/home/mm/.kioskconfig/kiosk_home")
+def get_machine_home():
+    return get_file_content("/home/mm/.machineconfig/machine_home")
 
 
-def get_ckc_version():
-    """ get the kiosk version
+def get_machine_version():
+    """ get the machine version
     """
-    return get_file_content("/home/mm/.kioskconfig/latest_version")
+    return get_file_content("/home/mm/.machineconfig/latest_version")
 
 
 if __name__ == '__main__':

@@ -91,7 +91,7 @@ def get_machine_home():
     return get_file_content("/home/pi/.machineconfig/machine_home")
 
 
-def get_ckc_version():
+def get_machine_version():
     """ get the machine version
     """
     return get_file_content("/home/pi/.machineconfig/latest_version")

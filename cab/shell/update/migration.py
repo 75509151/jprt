@@ -1,24 +1,15 @@
 #!/usr/bin/python
-
-"""
-do migrations
-
-
-Change Log:
-    2015-03-04  Created by Tavis
-
-"""
 import os
 import sys
-from update_utils import get_kiosk_home
 
-from update_info import UPDATE_lOG, PYTHON_PATH
-from db.dbm import get_db_instance
+from . import update_utils as upu 
+
+from . import update_info as upi 
 
 # now 1.0.0 is trunk version
 VERSION_LIST = ['1.1.0', '1.1.1', '1.1.2', '1.1.3','1.1.4', '1.1.5','1.1.6']
 
-log = UPDATE_lOG
+log = upi.UPDATE_lOG
 
 
 def header(func):
@@ -40,7 +31,6 @@ class Migration(object):
         self.version_list = self.get_version_list()
 
         self.verify_db()
-        self.db = get_db_instance()
 
     def get_version_list(self):
         return VERSION_LIST
@@ -50,8 +40,8 @@ class Migration(object):
         log.info("verify db!")
 
         VERIFY_DB_PY = os.path.join(
-            get_kiosk_home(), "jprt", "cab", "db", "verify_db.pyc")
-        os.system("%s %s" % (PYTHON_PATH, VERIFY_DB_PY))
+            upu.get_machine_home(), "jprt", "cab", "db", "verify_db.pyc")
+        os.system("%s %s" % (upi.PYTHON_PATH, VERIFY_DB_PY))
 
     def __del__(self):
         del self.version_list
@@ -78,7 +68,7 @@ class Migration(object):
                         try:
                             migrate()
                             rollback_list.append(rollback_name)
-                        except Exception, ex:
+                        except Exception as ex:
                             need_rollback = True
                             log.error("%s: %s" % (migrate_name, str(ex)))
                             break
@@ -113,7 +103,7 @@ class Migration(object):
 if __name__ == "__main__":
 
     if len(sys.argv) != 3:
-        print "Usage: ./migration.py old_version new_version"
+        print ("Usage: ./migration.py old_version new_version")
     else:
         old_version = sys.argv[1]
         new_version = sys.argv[2]

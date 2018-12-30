@@ -18,7 +18,7 @@ from .machine_info import (
     get_machine_home,
     get_machine_id,
     get_machine_name,
-    get_ckc_version,
+    get_machine_version,
     get_machine_location,
     get_config
 )

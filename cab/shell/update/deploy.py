@@ -8,27 +8,25 @@ import os
 import click
 import traceback
 
-from update_info import (UPDATE_lOG, UPDATE_FOLDER, BACKUP_FOLDER,
-                         DOWNLOAD_LOCK_PATH)
-from update_utils import (get_kiosk_downloaded_version, get_ckc_version, get_kiosk_home,
-                          set_ckc_version, ProcessLock)
-from migration import Migration
-from update_exceptions import MigrationException
+from . import update_info as upi 
+from . import update_utils as upu 
+from . import migration 
+from . import update_exceptions as upex
 
 
 class Deployer(object):
 
     def __init__(self):
-        self.log = UPDATE_lOG
-        self.download_lock = ProcessLock(DOWNLOAD_LOCK_PATH)
+        self.log = upi.UPDATE_lOG
+        self.download_lock = upu.ProcessLock(upi.DOWNLOAD_LOCK_PATH)
 
     def do_cmd(self, cmd):
         self.log.info("command: %s" % cmd)
         return os.system(cmd)
 
     def need_update(self):
-        downloaded_version = get_kiosk_downloaded_version()
-        ckc_version = get_ckc_version()
+        downloaded_version = upu.get_machine_downloaded_version()
+        ckc_version = upu.get_machine_version()
         self.log.info("download:%s    ckc:%s" %
                       (downloaded_version, ckc_version))
         if downloaded_version and ckc_version <= downloaded_version:
@@ -37,40 +35,40 @@ class Deployer(object):
 
     def backup(self):
 
-        self.backuppath = os.path.join(BACKUP_FOLDER, self.ckc_version)
+        self.backuppath = os.path.join(upi.BACKUP_FOLDER, self.ckc_version)
         self.do_cmd("rm -rf %s" % self.backuppath)
         self.do_cmd("mkdir -p %s" % self.backuppath)
         self.do_cmd("cp -r %s %s" %
-                    (os.path.join(get_kiosk_home(), "kiosk"), self.backuppath))
+                    (os.path.join(upu.get_machine_home(), "kiosk"), self.backuppath))
 
     def cp_downloaded_to_project_path(self):
-        project_path = os.path.join(get_kiosk_home(), "kiosk")
+        project_path = os.path.join(upu.get_machine_home(), "kiosk")
         certain_project_path = os.path.join(
-            UPDATE_FOLDER, self.downloaded_version, "kiosk")
+            upi.UPDATE_FOLDER, self.downloaded_version, "kiosk")
         self.do_cmd("rm -rf %s" % project_path)
         self.do_cmd("cp -r %s %s" % (certain_project_path, project_path))
 
     def do_migration(self):
-        m = Migration(self.ckc_version, self.downloaded_version)
+        m = migration.Migration(self.ckc_version, self.downloaded_version)
         ret = m.do_migrations()
         if not ret:
-            raise MigrationException("DB migration failed.")
+            raise upex.MigrationException("DB migration failed.")
 
     def roll_back(self):
         self.log.info("update failed, rolling back...")
-        self.do_cmd("rm -rf %s" % (os.path.join(get_kiosk_home(), "kiosk")))
+        self.do_cmd("rm -rf %s" % (os.path.join(upu.get_machine_home(), "kiosk")))
         self.do_cmd("cp -r %s %s" %
-                    (os.path.join(self.backuppath, "kiosk"), get_kiosk_home()))
+                    (os.path.join(self.backuppath, "kiosk"), upu.get_machine_home()))
 
     def _update(self):
-        self.ckc_version = get_ckc_version()
-        self.downloaded_version = get_kiosk_downloaded_version()
+        self.ckc_version = upu.get_machine_version()
+        self.downloaded_version = upu.get_machine_downloaded_version()
         self.backup()
 
         try:
             self.cp_downloaded_to_project_path()
             self.do_migration()
-            set_ckc_version(self.downloaded_version)
+            upu.set_machine_version(self.downloaded_version)
             self.log.info("update success")
         except Exception:
             self.log.warning("update err: %s" % str(traceback.format_exc()))

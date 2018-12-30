@@ -5,7 +5,7 @@ import sqlite3
 from cab.utils.c_log import init_log
 from cab.utils.machine_info import get_machine_id, \
     get_cur_time, get_config, \
-    get_ckc_version
+    get_machine_version
 from cab.utils.utils import get_db_uuid
 from cab.db.dbm import DB
 
@@ -289,7 +289,7 @@ class CkcDb():
         infos.append(("external_ip", ""))
         infos.append(("internal_ip", ""))
         infos.append(("mac", ""))
-        infos.append(("software", get_ckc_version()))
+        infos.append(("software", get_machine_version()))
         infos.append(("upgrade_time", ""))
         infos.append(("firmware", ""))
         infos.append(("timezone", ""))

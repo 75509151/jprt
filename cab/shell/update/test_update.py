@@ -1,10 +1,10 @@
 import os
-from update_utils import (get_kiosk_downloaded_version, get_ckc_version)
-from update_info import UPDATE_FOLDER, UPDATE_lOG, PYTHON_PATH
 import traceback
+from . import update_utils as upu 
+from . import update_info as upi 
 
 
-log = UPDATE_lOG
+log = upi.UPDATE_lOG
 
 
 class UpateTool(object):
@@ -20,8 +20,8 @@ class UpateTool(object):
         return ret
 
     def _need_update(self):
-        self.downloaded_version = get_kiosk_downloaded_version()
-        ckc_version = get_ckc_version()
+        self.downloaded_version = upu.get_machine_downloaded_version()
+        ckc_version = upu.get_machine_version()
         log.info("ckc_version: %s, downloaded_version: %s" %
                  (ckc_version, self.downloaded_version))
         if self.downloaded_version and ckc_version < self.downloaded_version:
@@ -31,8 +31,8 @@ class UpateTool(object):
 
     def _update(self):
         delpoly_py = os.path.join(
-            UPDATE_FOLDER, self.downloaded_version, "kiosk/src/shell/update/", "deploy.pyc")
-        self._doCommand("%s %s" % (PYTHON_PATH, delpoly_py))
+            upi.UPDATE_FOLDER, self.downloaded_version, "kiosk/src/shell/update/", "deploy.pyc")
+        self._doCommand("%s %s" % (upi.PYTHON_PATH, delpoly_py))
 
     def run(self):
         if self._need_update():
