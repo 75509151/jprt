@@ -51,15 +51,12 @@ class HpPrinter():
         self.dev.open()
 
 
-    def get_status(self):
+    def query(self):
         self.open()
         self.dev.queryDevice()
-        return self.dev.dq
-
-    def get_params(self):
-        self.open()
-        self.dev.queryDevice()
-        return self.dev.mq
+        params = self.dev.mq
+        status = self.dev.dq
+        return params, status
 
 
     def close(self):

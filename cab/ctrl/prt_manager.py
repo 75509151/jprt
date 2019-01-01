@@ -43,13 +43,14 @@ class PrtManager(object):
         except PrtSetupError as e:
             log.warning("install printer failed: %s" % str(e))
 
-    def report_params(self):
-        params = self.printer.get_params()
-        print("params: %s" % params)
+    def report(self, params=True, status=True):
+    
+        params, status = self.printer.query()
+        if params:
+            print("params: %s" % params)
+        if status:
+            print("status: %s" % status)
 
-    def report_status(self):
-        status = self.printer.get_status()
-        print("status: %s" % status)
 
     def print_file(self, document):
         pass
