@@ -10,6 +10,7 @@ from cab.utils.console import embed
 from cab.utils import constant as cst
 from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
+from cab.services.server_api import CallServer, call_once
 
 
 log = init_log("ctl")
@@ -40,8 +41,7 @@ class Controler(object):
         try:
             if self.prt_manager.need_install():
                 self.prt_manager.install_printer()
-            self.prt_manager.report_params()
-            self.prt_manager.report_status()
+            self.prt_manager.report()
         except Exception as e:
             log.warning(str(traceback.format_exc()))
 

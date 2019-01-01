@@ -27,7 +27,7 @@ def call_once(func, params=None, timeout=60):
 
 class CallServer(threading.Thread):
 
-    def __init__(self, host, port):
+    def __init__(self):
         super(CallServer, self).__init__()
         self.lock = threading.Lock()
         self.cli = Client(HOST, PORT)
