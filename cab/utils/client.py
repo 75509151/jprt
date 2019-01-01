@@ -2,15 +2,18 @@ import socket
 import os
 import traceback
 import select
+import threading
 
 from cab.utils.c_log import init_log
 
 _log = init_log("client", count=1)
 
 
+
 class Client(object):
 
     def __init__(self, serv_addr, serv_port, log=None):
+        self.lock = threading.Lock()
         self.serv_addr = serv_addr
         self.serv_port = serv_port
         self.sock = None
@@ -18,19 +21,31 @@ class Client(object):
         self.log = log if log else _log
 
     def init_sock(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.connect((self.serv_addr, self.serv_port))
-        self.log.debug("connected ")
-
-    def send(self, data):
-        if not self.sock:
-            self.init_sock()
         try:
-            self.sock.sendall(data)
-            self.log.info("send: %s " % data)
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.connect((self.serv_addr, self.serv_port))
+            self.log.debug("connected ")
         except Exception as e:
-            raise e
+            self.sock = None
+            self.log.warning("connect failed: %s" % str(e))
+
+    def send(self, data, retry=3):
+        with self.lock:
+            err = None
+            for i in range(retry):
+                if not self.sock:
+                    self.init_sock()
+                if self.sock:
+                    try:
+                        self.sock.sendall(data)
+                        self.log.info("send: %s " % data)
+                        return 
+                    except Exception as e:
+                        self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
+                        err = e
+                        continue
+            raise err 
 
     def recv(self, timeout=None):
 
