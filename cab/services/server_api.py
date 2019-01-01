@@ -29,10 +29,19 @@ class CallServer(threading.Thread):
 
     def __init__(self, host, port):
         super(CallServer, self).__init__()
+        self.lock = threading.Lock()
         self.cli = Client(HOST, PORT)
         self.task = queue.Queue()
 
-    def call(self, func, params=None):
+    def call(self, func, params=None, timeout=60):
+        with self.lock:
+            r = Request(func, params)
+            _id, data = Protocol().request_to_raw(r)
+            self.cli.send(data)
+            raw_reply = self.cli.recv(timeout=60)
+            log.info("recv: %s" % str(raw_reply))
+
+    def call_async(self, func, params=None):
         r = Request(func, params)
         self.task.put(r)
 
@@ -43,11 +52,12 @@ class CallServer(threading.Thread):
                 request = self.task.get(timeout=1)
                 while True:
                     _id, data = Protocol().request_to_raw(request)
-                    try:
-                        self.cli.send(data)
-                        self.cli.recv(timeout=recv_time_out)
-                    except Exception as e: 
-                        log.warning(str(e))
+                    with self.lock:
+                        try:
+                            self.cli.send(data)
+                            self.cli.recv(timeout=recv_time_out)
+                        except Exception as e: 
+                            log.warning(str(e))
 
             except queue.Empty:
                 time.sleep(0.5)
