@@ -1,5 +1,5 @@
 import threading
-import Queue
+import queue
 import time
 
 from cab.services.protocol import Protocol, Request
@@ -30,7 +30,7 @@ class CallServer(threading.Thread):
     def __init__(self, host, port):
         super(CallServer, self).__init__()
         self.cli = Client(HOST, PORT)
-        self.task = Queue.Queue()
+        self.task = queue.Queue()
 
     def call(self, func, params=None):
         r = Request(func, params)
@@ -40,7 +40,7 @@ class CallServer(threading.Thread):
         recv_time_out = 60
         while True:
             try:
-                request = self.task.get(timout=1)
+                request = self.task.get(timeout=1)
                 while True:
                     _id, data = Protocol().request_to_raw(request)
                     try:
@@ -49,7 +49,7 @@ class CallServer(threading.Thread):
                     except Exception as e: 
                         log.warning(str(e))
 
-            except Queue.Empty:
+            except queue.Empty:
                 time.sleep(0.5)
             except Exception as e: 
                 log.warning(str(e))
