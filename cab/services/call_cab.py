@@ -21,9 +21,11 @@ PORT = 1507
 
 log = init_log("call_prt")
 
-class CallPrt(threading.Thread):
+
+class CallCab(threading.Thread):
 
     def __init__(self, call_module_path):
+        super(CallCab, self).__init__()
         self.call_module_path = call_module_path
         self.stop = threading.Event()
         self.cli = Client(HOST, PORT)
@@ -123,3 +125,13 @@ class CallPrt(threading.Thread):
             self.cli.send(msg)  # CommunicateException
         else:
             log.error("Unknown Message Ignoring...")
+
+
+if __name__ == "__main__":
+
+    try:
+        call_cab = CallCab("cab.ckservice.cab_api")
+        call_cab.start()
+    except Exception as ex:
+        log.error("error in main: %s" % ex)
+        time.sleep(5)
