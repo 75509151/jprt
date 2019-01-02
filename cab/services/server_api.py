@@ -2,10 +2,18 @@ import threading
 import queue
 import time
 
-from cab.services.protocol import Protocol, Request
 from cab.utils.client import Client
 from cab.utils.c_log import init_log
-# from cab.utils.machine_info import  get_server
+from cab.services.protocol import (Protocol, Request,
+                                   Reply,
+                                   MSG_TYPE_REPLY,
+                                   CommunicateException,
+                                   ProtocolException,
+                                   UserException,
+                                   NoMethodException,
+                                   MAX_MESSAGE_LENGTH,
+                                   MSG_TYPE_REQUEST)
+
 
 __all__ = ["call_once", "CallServer"]
 
@@ -38,26 +46,72 @@ class CallServer(threading.Thread):
             r = Request(func, params)
             _id, data = Protocol().request_to_raw(r)
             self.cli.send(data)
-            raw_reply = self.cli.recv(timeout=60)
-            log.info("recv: %s" % str(raw_reply))
+            return self.on_recv()
 
     def call_async(self, func, params=None):
         r = Request(func, params)
         self.task.put(r)
+
+    def recvall(self, size):
+        """ recieve all. """
+        try:
+            s = size
+            buf = ""
+            while True:
+                b = self.cli.recv(s)
+                buf = buf + b
+                s = s - len(b)
+                if s == 0 or not b:
+                    return buf
+        except Exception as ex:
+            raise CommunicateException("RecvALL Error:%s" % ex)
+
+    def on_recv(self):
+        """ recieve request and return reply. """
+        protocol = Protocol()
+        head_size = protocol.get_head_size()
+        head = self.recvall(head_size)
+        if len(head) != head_size:
+            raise CommunicateException("Connection closed by peer")
+
+        _type, size, codec = protocol.parse_head(head)
+
+        if size > 0 and size < MAX_MESSAGE_LENGTH:
+            # print "request size:", size
+            body = self.recvall(size)  # raise CommunicateException
+            # print "request body", body
+            try:
+                body = codec.decode(body[:-1])
+            except Exception as ex:
+                e = "Decode Request Message Body Error: %s" % ex
+                log.error(e)
+                raise ProtocolException(e)
+        else:
+            raise CommunicateException("size error: " + str(size))
+        
+        if _type == MSG_TYPE_REPLY:
+            log.info("recv : %s" % body)
+        else:
+            log.error("Unknown Message Ignoring...")
+        return body
+
+ 
 
     def run(self):
         recv_time_out = 60
         while True:
             try:
                 request = self.task.get(timeout=1)
-                while True:
-                    _id, data = Protocol().request_to_raw(request)
-                    with self.lock:
+                _id, data = Protocol().request_to_raw(request)
+                with self.lock:
+                    while True:
                         try:
                             self.cli.send(data)
-                            self.cli.recv(timeout=recv_time_out)
+                            break
                         except Exception as e: 
                             log.warning(str(e))
+                            time.sleep(1)
+                self.on_recv()
 
             except queue.Empty:
                 time.sleep(0.5)
