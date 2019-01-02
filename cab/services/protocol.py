@@ -108,7 +108,7 @@ class AgentCodec(AgentBase):
                                 "code":code,
                                "msg": msg,
                                "data": data
-                               })
+                               }).encode()
         except Exception as ex:
             raise CodecException(str(ex))
 
@@ -137,7 +137,7 @@ class Reply(AgentBase):
     def __init__(self, reqId, code, msg, data, _type=MSG_TYPE_REPLY):
         AgentBase.__init__(self)
         self._rid = reqId
-        self._status = code
+        self._code = code
         self._msg = msg
         self._data = data
         self._type = _type
@@ -171,7 +171,7 @@ class Protocol(object):
 
     def reply_to_raw(self, reply):
         codec = AgentCodec()
-        body = codec.encode_reply(reply._rid, reply._code, reply.msg, reply._data)
+        body = codec.encode_reply(reply._rid, reply._code, reply._msg, reply._data)
         # print "body in reply_to_raw: %s %s" % (l, body)
         head = struct.pack(self.head_fmt, STX, reply._type, len(body))
         # print "head in reply_to_raw:", head

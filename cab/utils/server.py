@@ -2,10 +2,6 @@ import asyncore
 import traceback
 import sys
 import socket
-import platform
-from errno import EALREADY, EINPROGRESS, EWOULDBLOCK, ECONNRESET, EINVAL, \
-    ENOTCONN, ESHUTDOWN, EINTR, EISCONN, EBADF, ECONNABORTED, EPIPE, EAGAIN, \
-    errorcode
 from cab.utils.c_log import init_log
 from cab.utils.utils import run_in_thread
 
@@ -14,37 +10,6 @@ __all__ = ["Server", "run_server"]
 
 log = init_log("server", count=1)
 
-
-_DISCONNECTED = frozenset((ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED,
-                           EPIPE,
-                           EBADF))
-
-
-# class FixDispatcher(asyncore.dispatcher):
-    # def __init__(self, sock=None, map=None):
-        # asyncore.dispatcher.__init__(self, sock, map)
-        # if platform.python_version().startswith("2.7"):
-            # self.recv = self.fix_recv
-
-    # def fix_recv(self, buffer_size):
-        # try:
-            # data = self.socket.recv(buffer_size)
-            # if not data:
-                # # a closed connection is indicated by signaling
-                # # a read condition, and having recv() return 0.
-                # self.handle_close()
-                # return ''
-            # else:
-                # return data
-        # except socket.error, why:
-            # # winsock sometimes throws ENOTCONN
-            # if why.args[0] in _DISCONNECTED:
-                # self.handle_close()
-                # return ''
-            # elif why.args[0] in (EAGAIN, EWOULDBLOCK):
-                # return ''
-            # else:
-                # raise
 
 
 class Server(asyncore.dispatcher):

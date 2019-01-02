@@ -22,6 +22,7 @@ PORT = 1507
 
 log = init_log("call_server")
 
+
 def call_once(func, params=None, timeout=60):
     cli = Client(HOST, PORT)
     r = Request(func, params)
@@ -56,7 +57,7 @@ class CallServer(threading.Thread):
         """ recieve all. """
         try:
             s = size
-            buf = ""
+            buf = b""
             while True:
                 b = self.cli.recv(s)
                 buf = buf + b
@@ -79,9 +80,9 @@ class CallServer(threading.Thread):
         if size > 0 and size < MAX_MESSAGE_LENGTH:
             # print "request size:", size
             body = self.recvall(size)  # raise CommunicateException
-            # print "request body", body
+            print ("request body", body)
             try:
-                body = codec.decode(body[:-1])
+                body = codec.decode(body)
             except Exception as ex:
                 e = "Decode Request Message Body Error: %s" % ex
                 log.error(e)
@@ -120,5 +121,8 @@ class CallServer(threading.Thread):
 
 
 if __name__ =="__main__":
-    call_once("test", {"t": 1})
+    # call_once("test", {"t": 1})
+    call_server = CallServer()
+    call_server.call("print", params={"num": 4, "path": "/doc/test.txt"})
+    
 

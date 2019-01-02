@@ -72,9 +72,6 @@ class CallCab(threading.Thread):
             raise CommunicateException("size error: " + str(size))
 
         if _type == MSG_TYPE_REQUEST:
-            if len(body) != 3:
-                raise ProtocolException("Request Message Body Content Error")
-
             # break up the request
             req_id, func_name, params = body["id"], body["func"], body["params"]
 
@@ -113,13 +110,13 @@ class CallCab(threading.Thread):
             log.info("out %s(%s)" % (func_name, params))
 
             if exp is None:
-                reply_status = code.SUCCESS
+                reply_code = code.SUCCESS
                 reply_msg = res
             else:
-                reply_status = code.FAILED
+                reply_code = code.FAILED
                 reply_msg = exp
 
-            reply = Reply(req_id, reply_status, reply_msg)
+            reply = Reply(req_id, reply_code, reply_msg, res)
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
             self.cli.send(msg)  # CommunicateException
