@@ -40,21 +40,22 @@ class Client(object):
                     try:
                         self.sock.sendall(data)
                         self.log.info("send: %s " % data)
-                        return 
+                        return
                     except Exception as e:
                         self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
                         err = e
                         continue
-            raise err 
+            raise err
 
-    def recv(self, timeout=None):
+    def recv(self, msg_len=80960,timeout=None):
 
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
         if self.sock in fd_in:
-            data = self.sock.recv(80960)
+            data = self.sock.recv(msg_len)
             self.log.info("recv: %s" % data)
             return data
         return None
+
 
     def close(self):
         if self.sock:
