@@ -102,11 +102,12 @@ class AgentCodec(AgentBase):
         except Exception as ex:
             raise CodecException(str(ex))
 
-    def encode_reply(self, _id, func, params):
+    def encode_reply(self, _id, code, msg="", data=""):
         try:
             return json.dumps({"id": _id,
-                                "func":func,
-                               "params": params
+                                "code":code,
+                               "msg": msg,
+                               "data": data
                                })
         except Exception as ex:
             raise CodecException(str(ex))
@@ -133,11 +134,12 @@ class Request(AgentBase):
 class Reply(AgentBase):
     """ Reply """
 
-    def __init__(self, reqId, status, body, _type=MSG_TYPE_REPLY):
+    def __init__(self, reqId, code, msg, data, _type=MSG_TYPE_REPLY):
         AgentBase.__init__(self)
         self._rid = reqId
-        self._status = status
-        self._body = body
+        self._status = code
+        self._msg = msg
+        self._data = data
         self._type = _type
 
 
@@ -169,14 +171,12 @@ class Protocol(object):
 
     def reply_to_raw(self, reply):
         codec = AgentCodec()
-        body = codec.encode_reply(reply._rid, reply._status, reply._body)
-        l = len(body)
-        binary_body = struct.pack("%ss" % l, body)
+        body = codec.encode_reply(reply._rid, reply._code, reply.msg, reply._data)
         # print "body in reply_to_raw: %s %s" % (l, body)
-        head = struct.pack(self.head_fmt, STX, reply._type, l)
+        head = struct.pack(self.head_fmt, STX, reply._type, len(body))
         # print "head in reply_to_raw:", head
         # return head + binary_body + self.tail
-        return head.encode()
+        return head + body + self.tail
 
     def parse_head(self, head):
         try:
