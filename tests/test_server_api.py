@@ -34,4 +34,3 @@ if __name__ == "__main__":
     run_server()
     while True:
         time.sleep(2)
-    

@@ -59,25 +59,20 @@ class ClientHandler(asyncore.dispatcher):
             raise
 
     def handle_read(self):
-        try:
-            data = self.recv(80960)
-            if data:
-                log.info("handle_read: %s" % self.data)
 
-                if self.read_data_handler:
-                    # # !!!!! EAXAMPLE - ECHO
-                    self.read_data_handler(self, data)
-                else:
-                    self.default_read_data_handler(self, data)
-        except Exception:
-            log.warning("read: %s" % str(traceback.format_exc()))
-            raise
+        if self.read_data_handler:
+            # # !!!!! EAXAMPLE - ECHO
+            self.read_data_handler(self)
+        else:
+            self.default_read_data_handler(self)
 
     def handle_close(self):
         log.info('handle_close()')
         self.close()
 
-    def default_read_data_handler(self, client, data):
+    def default_read_data_handler(self, client):
+        #TODO: not safe
+        data = self.recv(8096)
         client.data_to_write = data
         print("data_to_write:%s" % client.data_to_write)
 
