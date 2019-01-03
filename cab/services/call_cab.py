@@ -63,7 +63,7 @@ class CallCab(threading.Thread):
             body = self.recvall(size)  # raise CommunicateException
             # print "request body", body
             try:
-                body = codec.decode(body[:-1])
+                body = codec.decode(body)
             except Exception as ex:
                 e = "Decode Request Message Body Error: %s" % ex
                 log.error(e)

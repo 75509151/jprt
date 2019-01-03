@@ -28,7 +28,7 @@ class ApiClient(ClientHandler):
         """ recieve all. """
         try:
             s = size
-            buf = ""
+            buf = b""
             while True:
                 b = self.recv(s)
                 buf = buf + b
@@ -39,15 +39,19 @@ class ApiClient(ClientHandler):
             raise CommunicateException("RecvALL Error:%s" % ex)
 
     def reply_cli(self):
-        reply_id = "000001"
-        reply_code = 0
-        reply_msg = "Success"
-        data = {"sub_code": 1,
-                "msg": "ok"}
-        reply = Reply(reply_id, reply_code, reply_msg, data)
-        protocol = Protocol()
-        msg = protocol.reply_to_raw(reply)
-        self.send(msg)
+        try:
+            reply_id = "000001"
+            reply_code = 0
+            reply_msg = "Success"
+            data = {"sub_code": 1,
+                    "msg": "ok"}
+            reply = Reply(reply_id, reply_code, reply_msg, data)
+            protocol = Protocol()
+            msg = protocol.reply_to_raw(reply)
+            self.send(msg)
+        except Exception as e:
+            log.warning("reply_cli: %s" % str(e))
+
 
     def on_recv(self):
         """ recieve request and return reply. """
@@ -64,7 +68,7 @@ class ApiClient(ClientHandler):
             body = self.recvall(size)  # raise CommunicateException
             # print "request body", body
             try:
-                body = codec.decode(body[:-1])
+                body = codec.decode(body)
             except Exception as ex:
                 e = "Decode Request Message Body Error: %s" % ex
                 log.error(e)
@@ -78,6 +82,7 @@ class ApiClient(ClientHandler):
 
             log.info("in %s(%s)" % (func_name, params))
             self.reply_cli()
+            log.info("out %s(%s)" % (func_name, params))
 
 
 

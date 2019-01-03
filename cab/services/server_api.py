@@ -125,4 +125,7 @@ if __name__ =="__main__":
     call_server = CallServer()
     call_server.call("print", params={"num": 4, "path": "/doc/test.txt"})
     
+    while True:
+        time.sleep(1)
+    
 
