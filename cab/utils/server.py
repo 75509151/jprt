@@ -6,7 +6,7 @@ from cab.utils.c_log import init_log
 from cab.utils.utils import run_in_thread
 
 
-__all__ = ["Server", "run_server"]
+__all__ = ["Server", "run_server", "ClientHandler"]
 
 log = init_log("server", count=1)
 
@@ -14,9 +14,9 @@ log = init_log("server", count=1)
 
 class Server(asyncore.dispatcher):
 
-    def __init__(self, address, read_data_handler=None):
+    def __init__(self, address, client=None):
         asyncore.dispatcher.__init__(self)
-        self.read_data_handler = read_data_handler
+        self.client = ClientHandler if not  client  else client
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
         self.bind(address)
@@ -30,18 +30,16 @@ class Server(asyncore.dispatcher):
         if client_info is not None:
             log.info('handle_accept:  %s, %s' %
                      (client_info[0], client_info[1]))
-            ClientHandler(client_info[0], client_info[
-                          1], self.read_data_handler)
+            self.client(client_info[0], client_info[1])
 
 
 
 class ClientHandler(asyncore.dispatcher):
 
-    def __init__(self, sock, address, read_data_handler=None):
+    def __init__(self, sock, address):
         asyncore.dispatcher.__init__(self, sock)
         self.data_to_write = ""
         self.data = ""
-        self.read_data_handler = read_data_handler
 
     def writable(self):
         return (len(self.data_to_write)>0)
@@ -59,22 +57,16 @@ class ClientHandler(asyncore.dispatcher):
             raise
 
     def handle_read(self):
+        #TODO: unsafe
+        data = self.recv(8096)
+        self.data_to_write = data
+        print("data_to_write:%s" % self.data_to_write)
 
-        if self.read_data_handler:
-            # # !!!!! EAXAMPLE - ECHO
-            self.read_data_handler(self)
-        else:
-            self.default_read_data_handler(self)
 
     def handle_close(self):
         log.info('handle_close()')
         self.close()
 
-    def default_read_data_handler(self, client):
-        #TODO: not safe
-        data = self.recv(8096)
-        client.data_to_write = data
-        print("data_to_write:%s" % client.data_to_write)
 
 
 @run_in_thread
