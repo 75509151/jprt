@@ -1,6 +1,8 @@
 import threading
+import traceback
 import queue
 import time
+import json
 
 from cab.services import code
 from cab.services.protocol import (Protocol, Request,
@@ -16,10 +18,16 @@ from cab.utils.c_log import init_log
 # from cab.utils.machine_info import  get_server
 
 
+# HOST = "127.0.0.1"
 HOST = "127.0.0.1"
 PORT = 1507
 
-log = init_log("call_prt")
+cab_host = "127.0.0.1"
+cab_port = 1507 
+
+
+
+log = init_log("call_cab")
 
 
 class CallCab(threading.Thread):
@@ -29,10 +37,21 @@ class CallCab(threading.Thread):
         self.call_module_path = call_module_path
         self.stop = threading.Event()
         self.cli = Client(HOST, PORT)
+        self.cab_cli = Client(HOST, PORT)
 
     def run(self):
+
         while not self.stop.isSet():
-            self.on_recv()
+            try:
+                self.on_recv()
+            except CommunicateException as e:
+                print(str(e))
+                time.sleep(1)
+                log.warning("retry remote server....")
+            except Exception as e:
+                log.warning("run: %s" % str(traceback.format_exc()))
+
+            
 
     def recvall(self, size):
         """ recieve all. """
@@ -40,17 +59,16 @@ class CallCab(threading.Thread):
             s = size
             buf = ""
             while True:
-                b = self.cli.recv(s)
+                b = self.cli.recv(s, init_sock=True)
                 buf = buf + b
                 s = s - len(b)
                 if s == 0 or not b:
                     return buf
+
         except Exception as ex:
             raise CommunicateException("RecvALL Error:%s" % ex)
 
-    def on_recv(self):
-        """ recieve request and return reply. """
-        protocol = Protocol()
+    def _on_recv_body(self, protocol):
         head_size = protocol.get_head_size()
         head = self.recvall(head_size)
         if len(head) != head_size:
@@ -70,7 +88,15 @@ class CallCab(threading.Thread):
                 raise ProtocolException(e)
         else:
             raise CommunicateException("size error: " + str(size))
+        
+        return _type, body
 
+
+    def on_recv(self):
+        """ recieve request and return reply. """
+        protocol = Protocol()
+        _type, body = self._on_recv_body(protocol)
+        
         if _type == MSG_TYPE_REQUEST:
             # break up the request
             req_id, func_name, params = body["id"], body["func"], body["params"]
@@ -78,45 +104,29 @@ class CallCab(threading.Thread):
             log.info("in %s(%s)" % (func_name, params))
 
             # get the result for the request
-            res = None
-            exp = None
+            reply_code = code.SUCCESS
+            sub_data = ""
             if func_name == "is_on_line":
-                res = 1
+                pass
             else:
                 try:
-                    # imort module
-                    mod = __import__(self.call_module_path)
-                    components = self.call_module_path.split('.')
-                    for comp in components[1:]:
-                        mod = getattr(mod, comp)
-                    func = getattr(mod, func_name, None)
+                    self.cab_cli.send(json.dumps({"func": func_name,
+                        "params": params}))
+                    sub_data = self.cab_cli.recv()
+                
+                except ConnectionRefusedError as e:
+                    reply_code = code.UNAVALIABLE_SERVICE
 
-                    if func is not None:
-                        if hasattr(func, "__call__"):
-                            try:
-                                res = func(*params)
-                            except Exception as ex:
-                                log.error("Error when execute func(%s): %s" % (func_name, ex))
-                                raise UserException(str(ex))
-                        else:
-                            raise NoMethodException("% can not be callable" % func_name)
-                    else:
-                        raise NoMethodException("No function or attr %s" % func_name)
                 except Exception as ex:
-                    print (ex)
-                    exp = ex
+                    log.warning(str(ex))
+                    reply_code = code.FAILED
 
             # print "reqid, result: ", reqId, res
             log.info("out %s(%s)" % (func_name, params))
 
-            if exp is None:
-                reply_code = code.SUCCESS
-                reply_msg = res
-            else:
-                reply_code = code.FAILED
-                reply_msg = exp
+            reply_msg = code.CODE2MSG.get(reply_code)
 
-            reply = Reply(req_id, reply_code, reply_msg, res)
+            reply = Reply(req_id, reply_code, reply_msg, sub_data)
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
             self.cli.send(msg)  # CommunicateException
@@ -132,3 +142,4 @@ if __name__ == "__main__":
     except Exception as ex:
         log.error("error in main: %s" % ex)
         time.sleep(5)
+    call_cab.join()

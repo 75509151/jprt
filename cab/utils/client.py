@@ -11,6 +11,7 @@ _log = init_log("client", count=1)
 
 
 class Client(object):
+    #TODO: 
 
     def __init__(self, serv_addr, serv_port, log=None):
         self.lock = threading.Lock()
@@ -29,25 +30,28 @@ class Client(object):
         except Exception as e:
             self.sock = None
             self.log.warning("connect failed: %s" % str(e))
+            raise e
 
-    def send(self, data, retry=3):
+    def send(self, data, retry=1):
         with self.lock:
             err = None
             for i in range(retry):
-                if not self.sock:
-                    self.init_sock()
-                if self.sock:
-                    try:
-                        self.sock.sendall(data)
-                        self.log.info("send: %s " % data)
-                        return
-                    except Exception as e:
-                        self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
-                        err = e
-                        continue
+                try:
+                    if not self.sock:
+                        self.init_sock()
+                    ret = self.sock.sendall(data)
+                    self.log.info("send: %s " % data)
+                    return ret
+                except Exception as e:
+                    self.sock = None
+                    self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
+                    err = e
+                    continue
             raise err
 
-    def recv(self, msg_len=80960,timeout=None):
+    def recv(self, msg_len=80960,timeout=None, init_sock= False):
+        if not self.sock and init_sock:
+            self.init_sock()
 
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
         if self.sock in fd_in:
