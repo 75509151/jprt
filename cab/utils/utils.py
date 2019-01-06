@@ -18,3 +18,14 @@ def run_in_thread(fn):
 
 def get_db_uuid():
     return str(uuid.uuid4())
+
+def extern_if(fn):
+    setattr(fn, "__extern_if__", True)
+    return fn
+
+def get_extern_if(obj, cmd):
+    fn = getattr(obj, cmd, None)
+    if fn and getattr(fn, "__extern_if__") is True:
+        return fn
+    return None
+

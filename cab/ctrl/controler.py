@@ -1,20 +1,68 @@
 import sys
+import json
 import time
 import threading
 import traceback
 import signal
 
-from cab.utils.server import Server, run_server
+from cab.utils.server import Server, run_server, ClientHandler
 from cab.utils.c_log import init_log
 from cab.utils.console import embed
 from cab.utils import constant as cst
 from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.server_api import CallServer, call_once
+from cab.services import code
+from cab.utils.utils import get_extern_if, extern_if
 
 
 log = init_log("ctl")
 
+
+class ApiClient(ClientHandler):
+    def __init__(self, sock, address, ctrl):
+        super(ApiClient, self).__init__(sock, address)
+        self.ctrl = ctrl
+
+    def _get_func(self, data):
+        try:
+            data = json.loads(data)
+        except ValueError as e:
+            log.warning("could not decoded: %s" % str(data))
+            raise code.InternalErr("")
+
+        func = get_extern_if(self.ctrl, data["func"])
+        if not func:
+            raise code.NoSuchApiErr(data["func"])
+        return func, data["params"]
+
+    def _do_func(self, func, params):
+        func(params)
+
+    def handle_read(self):
+        sub_data = {}
+        res = None
+        data = self.recv(80960)
+        try:
+            func, params = self._get_func(data)
+
+            self._do_func(func, params)
+        except code.InternalErr:
+            sub_data["code"] = code.INTERNAL_ERROR
+        except Exception as e:
+            log.warning(str(e))
+
+
+class ApiServer(Server):
+
+    def __init__(self, address, client, ctrl):
+        super(ApiServer, self).__init__(address, client, ctrl)
+        self.ctrl = ctrl
+
+    def handle_accept(self):
+        client_info = self.accept()
+        if client_info is not None:
+            self.client(client_info[0], client_info[1], self.ctrl)
 
 
 class Controler(object):
@@ -31,11 +79,7 @@ class Controler(object):
         log.info("catch signal: %s, %s" % (signum, frame))
 
     def init_server(self):
-        self.serv = Server(
-            ("0.0.0.0", cst.G_CTRL_PORT), self.sock_process_hook)
-
-    def sock_process_hook(self, data):
-        pass
+        self.serv = ApiServer(("0.0.0.0", cst.G_CTRL_PORT), ApiClient, self)
 
     def before_work(self):
         try:
@@ -45,6 +89,8 @@ class Controler(object):
         except Exception as e:
             log.warning(str(traceback.format_exc()))
 
+    def print_file(self, **kw):
+        pass
 
     def run(self, test=False):
         try:
@@ -57,7 +103,7 @@ class Controler(object):
             if test:
                 embed()
             else:
-                interval_time = 5*60
+                interval_time = 5 * 60
                 while not self._stop_event.is_set():
                     time.sleep(interval_time)
                     try:
@@ -69,10 +115,7 @@ class Controler(object):
             log.error("exit unexpect: %s" % str(traceback.format_exc()))
 
 
-
 if __name__ == "__main__":
     ctrl = Controler()
-    test =True if len(sys.argv) >= 2 and sys.argv[1] == "test" else False
+    test = True if len(sys.argv) >= 2 and sys.argv[1] == "test" else False
     ctrl.run(test)
-
-
