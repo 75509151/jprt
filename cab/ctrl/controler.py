@@ -37,20 +37,27 @@ class ApiClient(ClientHandler):
         return func, data["params"]
 
     def _do_func(self, func, params):
-        func(params)
+        return func(params)
 
     def handle_read(self):
-        sub_data = {}
-        res = None
+        code = None
         data = self.recv(80960)
         try:
             func, params = self._get_func(data)
 
-            self._do_func(func, params)
+            sub_data = self._do_func(func, params)
+            self.send(json.dumps(sub_data))
+            return
         except code.InternalErr:
-            sub_data["code"] = code.INTERNAL_ERROR
+            code = code.INTERNAL_ERROR
+        except code.NoSuchApiErr:
+            code = code.UNKNOWN_API
         except Exception as e:
             log.warning(str(e))
+            code = code.INTERNAL_ERROR
+
+        self.send(json.dumps({"code": code}))
+        
 
 
 class ApiServer(Server):
@@ -89,8 +96,9 @@ class Controler(object):
         except Exception as e:
             log.warning(str(traceback.format_exc()))
 
+    @extern_if
     def print_file(self, **kw):
-        pass
+        return {}
 
     def run(self, test=False):
         try:

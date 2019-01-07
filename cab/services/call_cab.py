@@ -98,13 +98,13 @@ class CallCab(threading.Thread):
         _type, body = self._on_recv_body(protocol)
         
         if _type == MSG_TYPE_REQUEST:
+            reply_code = code.SUCCESS
             # break up the request
             req_id, func_name, params = body["id"], body["func"], body["params"]
 
             log.info("in %s(%s)" % (func_name, params))
 
             # get the result for the request
-            reply_code = code.SUCCESS
             sub_data = ""
             if func_name == "is_on_line":
                 pass
@@ -113,6 +113,12 @@ class CallCab(threading.Thread):
                     self.cab_cli.send(json.dumps({"func": func_name,
                         "params": params}))
                     sub_data = self.cab_cli.recv()
+
+                    sub_data_dic = json.loads(sub_data)
+
+                    _code = sub_data_dic.get("code", None)
+                    if _code is not None:
+                        reply_code = _code
                 
                 except ConnectionRefusedError as e:
                     reply_code = code.UNAVALIABLE_SERVICE
@@ -124,9 +130,13 @@ class CallCab(threading.Thread):
             # print "reqid, result: ", reqId, res
             log.info("out %s(%s)" % (func_name, params))
 
-            reply_msg = code.CODE2MSG.get(reply_code)
+            reply_msg = code.CODE2MSG.get(reply_code, "Unknown Error")
 
-            reply = Reply(req_id, reply_code, reply_msg, sub_data)
+            if reply_code:
+                reply = Reply(req_id, reply_code, reply_msg, json.dumps({}))
+            else:
+                reply = Reply(req_id, reply_code, reply_msg, sub_data)
+
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
             self.cli.send(msg)  # CommunicateException
