@@ -12,7 +12,7 @@ from cab.utils.c_log import init_log
 from cab.prts.prt_exceptions import (PrtSetupError,
                                      DeviceNotFoundError,
                                      PrtPrintError)
-from cab.prts import office
+# from cab.prts import office
 
 log = init_log("prt")
 
@@ -28,7 +28,7 @@ class HpPrinter():
         for printer in hp_printers:
             if (device_uri is None and name is None) or \
                     (device_uri and device_uri == printer.device_uri) or\
-                    (name and printer.name==name):
+                    (name and printer.name == name):
                 self.name = printer.name
                 self.device_uri = printer.device_uri
                 break
@@ -50,14 +50,12 @@ class HpPrinter():
     def open(self):
         self.dev.open()
 
-
     def query(self):
         self.open()
         self.dev.queryDevice()
         params = self.dev.mq
         status = self.dev.dq
         return params, status
-
 
     def close(self):
         self.dev.close()
@@ -68,15 +66,11 @@ class HpPrinter():
             raise Exception("not file")
 
         if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
-            log.info("office")
-            if office.print_file(document, self.name):
-                raise PrtPrintError("print file error")
-
+            cmd = "unoconv --output '{document}' | /usr/bin/lpr -P '{priner}'".format(document, self.name)
         else:
-            log.info("not office")
             cmd = "/usr/bin/lpr -P '%s' '%s'" % (self.name, document)
-            if os.system(cmd) != 0:
-                raise PrtPrintError("print file error")
+        if os.system(cmd) != 0:
+            raise PrtPrintError("print file error")
 
         if remove:
             os.system("rm %s" % document)
@@ -95,7 +89,7 @@ class HpPrinter():
                 if connection_type == "usb":
                     type_ind = "0"
                 else:
-                    #TODO 
+                    # TODO
                     type_ind = "1"
 
                 child.sendline(type_ind)

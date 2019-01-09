@@ -8,6 +8,7 @@ from cab.utils.c_log import init_log
 from cab.db.db_pool import DB_POOL
 from cab.prts.hp.hp_prt import HpPrinter
 from cab.prts.prt_exceptions import PrtSetupError
+from cab.prts import office
 
 log = init_log("prt_manager")
 
@@ -44,7 +45,7 @@ class PrtManager(object):
             log.warning("install printer failed: %s" % str(e))
 
     def report(self, params=True, status=True):
-    
+
         params, status = self.printer.query()
         if params:
             print("params: %s" % params)
@@ -52,8 +53,14 @@ class PrtManager(object):
             print("status: %s" % status)
 
 
-    def print_file(self, document):
-        pass
+    def print_file(self, document, num=1, colorful=False, sides="one-sided"):
+        options = ""
+        # if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
+            # log.info("office")
+            # if office.print_file(document, self.name):
+                # raise PrtPrintError("print file error")
+
+        self.printer.print_file(document, options, remove=True)
 
     def report_print_result(self):
         pass
@@ -73,7 +80,7 @@ if __name__ == "__main__":
     manager = PrtManager()
     if manager.need_install():
         manager.install_printer()
-        manager.report_params()
+        manager.report(params=True, status=True)
     else:
         print("not need install")
-    manager.report_status()
+        manager.report(status=True)

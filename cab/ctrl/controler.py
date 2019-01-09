@@ -13,7 +13,7 @@ from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.server_api import CallServer, call_once
 from cab.services import code
-from cab.utils.utils import get_extern_if, extern_if
+from cab.utils.utils import get_extern_if, extern_if, download_file
 
 
 log = init_log("ctl")
@@ -40,24 +40,28 @@ class ApiClient(ClientHandler):
         return func(params)
 
     def handle_read(self):
-        code = None
+        err_no = 0
+        sub_data = {}
+
         data = self.recv(80960)
         try:
             func, params = self._get_func(data)
 
             sub_data = self._do_func(func, params)
-            self.send(json.dumps(sub_data))
-            return
-        except code.InternalErr:
-            code = code.INTERNAL_ERROR
-        except code.NoSuchApiErr:
-            code = code.UNKNOWN_API
+        except code.InternalErr as e:
+            sub_data["sub_code"] = e.code
+            sub_data["msg"] = e.msg
+
+        except code.ExternalErr as e:
+            err_no = e.code
+
         except Exception as e:
             log.warning(str(e))
-            code = code.INTERNAL_ERROR
+            err_no = code.INTERNAL_ERROR
 
-        self.send(json.dumps({"code": code}))
-        
+        if sub_code:
+            self.send(json.dumps({"code": err_no,
+                                  "sub_data":sub_data}))
 
 
 class ApiServer(Server):
@@ -96,8 +100,23 @@ class Controler(object):
         except Exception as e:
             log.warning(str(traceback.format_exc()))
 
+    # def _print_file_check_params()
+
     @extern_if
     def print_file(self, **kw):
+        try:
+            doucument_or_url, callback_url, trans_id = kw["file"], kw["callback_url"], kw["trans_id"]
+        except KeyError as e:
+            raise code.MissFieldsErr(str(e))
+        num = kw.get("num", 1)
+        sides = kw.get("sides", "one-sided")
+        colorful = kw.get("colorful", False)
+        udisk = kw.get("udisk", False)
+
+
+        document = doucument_or_url if udisk else download_file(doucument_or_url)
+
+        self.prt_manager.print_file(document, num, colorful, sides)
         return {}
 
     def run(self, test=False):

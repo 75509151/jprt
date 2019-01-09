@@ -23,8 +23,7 @@ HOST = "127.0.0.1"
 PORT = 1507
 
 cab_host = "127.0.0.1"
-cab_port = 1507 
-
+cab_port = 1507
 
 
 log = init_log("call_cab")
@@ -50,8 +49,6 @@ class CallCab(threading.Thread):
                 log.warning("retry remote server....")
             except Exception as e:
                 log.warning("run: %s" % str(traceback.format_exc()))
-
-            
 
     def recvall(self, size):
         """ recieve all. """
@@ -88,15 +85,14 @@ class CallCab(threading.Thread):
                 raise ProtocolException(e)
         else:
             raise CommunicateException("size error: " + str(size))
-        
-        return _type, body
 
+        return _type, body
 
     def on_recv(self):
         """ recieve request and return reply. """
         protocol = Protocol()
         _type, body = self._on_recv_body(protocol)
-        
+
         if _type == MSG_TYPE_REQUEST:
             reply_code = code.SUCCESS
             # break up the request
@@ -105,21 +101,20 @@ class CallCab(threading.Thread):
             log.info("in %s(%s)" % (func_name, params))
 
             # get the result for the request
-            sub_data = ""
+            sub_data = None
             if func_name == "is_on_line":
                 pass
             else:
                 try:
                     self.cab_cli.send(json.dumps({"func": func_name,
-                        "params": params}))
-                    sub_data = self.cab_cli.recv()
+                                                  "params": params}))
+                    recv_data = self.cab_cli.recv()
 
-                    sub_data_dic = json.loads(sub_data)
+                    recv_data_dic = json.loads(sub_data)
 
-                    _code = sub_data_dic.get("code", None)
-                    if _code is not None:
-                        reply_code = _code
-                
+                    reply_code = recv_data_dic.get("code")
+                    sub_data = recv_data_dic.get("sub_data")
+
                 except ConnectionRefusedError as e:
                     reply_code = code.UNAVALIABLE_SERVICE
 
@@ -131,11 +126,8 @@ class CallCab(threading.Thread):
             log.info("out %s(%s)" % (func_name, params))
 
             reply_msg = code.CODE2MSG.get(reply_code, "Unknown Error")
-
-            if reply_code:
-                reply = Reply(req_id, reply_code, reply_msg, json.dumps({}))
-            else:
-                reply = Reply(req_id, reply_code, reply_msg, sub_data)
+            sub_data = json.dumps({}) if not sub_data else json.dump(sub_data)
+            reply = Reply(req_id, reply_code, reply_msg, sub_data)
 
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
