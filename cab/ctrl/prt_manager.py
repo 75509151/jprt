@@ -12,6 +12,7 @@ from cab.prts import office
 
 log = init_log("prt_manager")
 
+
 class PrtManager(object):
     def __init__(self):
         self.printer = HpPrinter()
@@ -44,21 +45,23 @@ class PrtManager(object):
         except PrtSetupError as e:
             log.warning("install printer failed: %s" % str(e))
 
-    def report(self, params=True, status=True):
-
+    def query(self, params=False, status=False):
         params, status = self.printer.query()
         if params:
             print("params: %s" % params)
         if status:
             print("status: %s" % status)
+        return params, status
 
+    def report(self, params=True, status=True):
+        self.query(params, status)
 
     def print_file(self, document, num=1, colorful=False, sides="one-sided"):
         options = ""
         # if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
-            # log.info("office")
-            # if office.print_file(document, self.name):
-                # raise PrtPrintError("print file error")
+        # log.info("office")
+        # if office.print_file(document, self.name):
+        # raise PrtPrintError("print file error")
 
         self.printer.print_file(document, options, remove=True)
 

@@ -15,6 +15,8 @@ from cab.services.server_api import CallServer, call_once
 from cab.services import code
 from cab.utils.utils import get_extern_if, extern_if, download_file
 
+from cab.prts.prt_exceptions import PrtError
+
 
 log = init_log("ctl")
 
@@ -59,9 +61,8 @@ class ApiClient(ClientHandler):
             log.warning(str(e))
             err_no = code.INTERNAL_ERROR
 
-        if sub_code:
-            self.send(json.dumps({"code": err_no,
-                                  "sub_data":sub_data}))
+        self.send(json.dumps({"code": err_no,
+                              "sub_data": sub_data}))
 
 
 class ApiServer(Server):
@@ -113,11 +114,51 @@ class Controler(object):
         colorful = kw.get("colorful", False)
         udisk = kw.get("udisk", False)
 
+        sub_data = {"sub_code": 0,
+                    "msg": "Printing"}
 
         document = doucument_or_url if udisk else download_file(doucument_or_url)
 
-        self.prt_manager.print_file(document, num, colorful, sides)
-        return {}
+        try:
+            self.prt_manager.print_file(document, num, colorful, sides)
+        except PrtError as e:
+            sub_data["code"] = e.code
+            sub_data["msg"] = e.msg
+
+        return sub_data
+
+    @extern_if
+    def open_door(self, **kw):
+        sub_data = {"sub_code": 0,
+                    "msg": "Success"}
+        return sub_data
+
+    @extern_if
+    def get_printer_status(self, **kw):
+        sub_data = {"sub_code": 0,
+                    "msg": ""}
+        try:
+            _, status = self.prt_manager.query(status=True)
+            sub_data["msg"] = status
+        except PrtError as e:
+            sub_data["code"] = e.code
+            sub_data["msg"] = e.msg
+
+        return sub_data
+
+    @extern_if
+    def upload_file(self, **kw):
+        sub_data = {"sub_code": 3,
+                    "msg": "Upload Failed"}
+        return sub_data
+
+    @extern_if
+    def get_udisk_info(self, **kw):
+        sub_data = {"sub_code": 2,
+                    "msg": "U disk does not exist"}
+        return sub_data
+
+
 
     def run(self, test=False):
         try:

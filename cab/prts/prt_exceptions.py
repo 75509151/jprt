@@ -1,9 +1,15 @@
+class PrtError(Exception):
+    code = 2000
+    msg = ""
+
 class PrtSetupError(Exception):
-    """PrtSetup Error"""
+    code = 2001
+    msg = "Printer Setup Failed"
 
 class DeviceNotFoundError(Exception):
-    """DeviceNot Found"""
+    code = 2002
+    msg = "Device Not Found"
 
 class PrtPrintError(Exception):
-    """call print failed"""
-
+    code = 2003
+    msg = "Print File Failed"
