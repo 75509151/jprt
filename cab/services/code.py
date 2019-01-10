@@ -8,6 +8,8 @@ INTERNAL_ERROR = 6
 
 
 DOWNLOAD_ERROR = 1000
+UNEXIST_ERROR = 1002
+UPLOAD_ERROR = 1003
 
 CODE2MSG={
         SUCCESS: "Success",
@@ -45,3 +47,12 @@ class InternalErr(Exception):
 class DownloadError(InternalErr):
     code = DOWNLOAD_ERROR
     msg = "file download failed"
+
+
+class FileUnEixstError(InternalErr):
+    code = UNEXIST_ERROR
+    msg = "File does not exist"
+
+class UpoloadError(InternalErr):
+    code = UpoloadError
+    msg = "Upload failed"

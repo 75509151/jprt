@@ -13,7 +13,11 @@ from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.server_api import CallServer, call_once
 from cab.services import code
-from cab.utils.utils import get_extern_if, extern_if, download_file
+from cab.utils.utils import (get_extern_if, 
+        extern_if, 
+        download_file, 
+        upload_file,
+        get_udisk)
 
 from cab.prts.prt_exceptions import PrtError
 
@@ -148,18 +152,35 @@ class Controler(object):
 
     @extern_if
     def upload_file(self, **kw):
-        sub_data = {"sub_code": 3,
-                    "msg": "Upload Failed"}
+        sub_data = {"sub_code": 0,
+                    "msg": "Success"}
+        try:
+            src, dst = kw["src"], kw["dst"]
+        except KeyError as e:
+            raise code.MissFieldsErr(str(e))
+        
+        server = "{user}@{ip}".format("pi", "127.0.0.1")
+        dst = "{server}:{dst}".format(server, dst)
+
+        upload_file(src, dst)
+
         return sub_data
 
     @extern_if
     def get_udisk_info(self, **kw):
-        sub_data = {"sub_code": 2,
-                    "msg": "U disk does not exist"}
+        sub_data = {"sub_code": 0,
+                    "msg": []}
         try:
-            doucument_or_url, callback_url, trans_id = kw["file"], kw["callback_url"], kw["trans_id"]
+            path = kw["path"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
+
+        files = get_udisk(path) 
+
+        if files is None:
+            raise code.FileUnEixstError()
+
+        sub_data["msg"] = files
         
         return sub_data
 

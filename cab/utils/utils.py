@@ -5,7 +5,7 @@ import uuid
 import getpass
 
 import magic
-from cab.services.code import DownloadError
+from cab.services import code
 
 def get_mimetype(file_name):
     mime = magic.Magic(mime=True)
@@ -64,11 +64,27 @@ def get_files(path, suffix=None):
 
 def download_file(url, dst="/tmp/", retry=3):
     new_name = str(uuid.uuid4())
+    cmd = "wget -c  -t 3 --timeout=600 %s -O %s" % new_name
     for i in range(retry):
-        cmd = "wget -c  -t 3 --timeout=600 %s -O %s"
         ret = subprocess.call(cmd)
         if ret == 0:
             return os.path.join(dst, new_name)
-    raise DownloadError()
+    raise code.DownloadError(url)
+
+
+def upload_file(src, dst, retry=3, port=22, rename=True):
+    if rename:
+        new_name = str(uuid.uuid4())
+
+
+    ssh_cmd = "ssh -p %s" % port
+    cmd = "rsync -avz -e '{ssh_cmd}' {src} {dst} ".format(ssh_cmd, src, dst)
+    for i in range(retry):
+        ret = subprocess.call(cmd)
+        if ret == 0:
+            return
+    raise code.UpoloadError()
+
+
 
 
