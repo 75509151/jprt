@@ -156,6 +156,11 @@ class Controler(object):
     def get_udisk_info(self, **kw):
         sub_data = {"sub_code": 2,
                     "msg": "U disk does not exist"}
+        try:
+            doucument_or_url, callback_url, trans_id = kw["file"], kw["callback_url"], kw["trans_id"]
+        except KeyError as e:
+            raise code.MissFieldsErr(str(e))
+        
         return sub_data
 
 
