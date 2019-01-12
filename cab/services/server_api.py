@@ -4,6 +4,7 @@ import time
 
 from cab.utils.client import Client
 from cab.utils.c_log import init_log
+from cab.utils.machine_info import get_config
 from cab.services.protocol import (Protocol, Request,
                                    Reply,
                                    MSG_TYPE_REPLY,
@@ -17,8 +18,12 @@ from cab.services.protocol import (Protocol, Request,
 
 __all__ = ["call_once", "CallServer"]
 
-HOST = "127.0.0.1"
-PORT = 1507
+if get_config("ckc").get("main", "test") == "False":
+    HOST = "127.0.0.1"
+    PORT = 5525
+else:
+    HOST = "127.0.0.1"
+    PORT = 5525
 
 log = init_log("call_server")
 
