@@ -141,4 +141,5 @@ class HpPrinter():
 
 
 if __name__ == "__main__":
+    prt = HpPrinter()
     embed()
