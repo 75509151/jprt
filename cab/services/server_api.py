@@ -3,6 +3,7 @@ import queue
 import time
 
 from cab.utils.client import Client
+from cab.utils.console import embed
 from cab.utils.c_log import init_log
 from cab.utils.machine_info import get_config
 from cab.services.protocol import (Protocol, Request,
@@ -126,9 +127,7 @@ class CallServer(threading.Thread):
 if __name__ =="__main__":
     # call_once("test", {"t": 1})
     call_server = CallServer()
-    call_server.call("print", params={"num": 4, "path": "/doc/test.txt"})
-    
-    while True:
-        time.sleep(1)
+    call_server.call("register", params={"num": 4, "path": "/doc/test.txt"})
+    embed()
     
 
