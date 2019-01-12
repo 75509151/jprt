@@ -125,9 +125,7 @@ class CallServer(threading.Thread):
 
 
 if __name__ =="__main__":
-    # call_once("test", {"t": 1})
-    call_server = CallServer()
-    call_server.call("register", params={"num": 4, "path": "/doc/test.txt"})
+    cs = CallServer()
     embed()
     
 
