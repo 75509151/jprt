@@ -13,13 +13,17 @@ from cab.utils import constant as cst
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.server_api import CallServer, call_once
 from cab.services import code
-from cab.utils.utils import (get_extern_if, 
-        extern_if, 
-        download_file, 
-        upload_file,
-        get_udisk)
+from cab.utils.utils import (get_extern_if,
+                             extern_if,
+                             download_file,
+                             upload_file,
+                             get_udisk)
 
 from cab.prts.prt_exceptions import PrtError
+from cab.utils.machine_info import (get_machine_id,
+                                    get_machine_type,
+                                    get_hw_addr,
+                                    set_machine_id)
 
 
 log = init_log("ctl")
@@ -89,6 +93,8 @@ class Controler(object):
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         self.prt_manager = PrtManager()
+        self.prt_st = None
+        self.cs = CallServer()
 
     def exit_gracefully(self, signum, frame):
         self._stop_event.set()
@@ -98,14 +104,15 @@ class Controler(object):
         self.serv = ApiServer(("0.0.0.0", cst.G_CTRL_PORT), ApiClient, self)
 
     def before_work(self):
+        self.register()
+
         try:
             if self.prt_manager.need_install():
                 self.prt_manager.install_printer()
-            self.prt_manager.report()
         except Exception as e:
             log.warning(str(traceback.format_exc()))
-
-    # def _print_file_check_params()
+        
+        self.report(params=True, status=True)
 
     @extern_if
     def print_file(self, **kw):
@@ -142,8 +149,13 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": ""}
         try:
-            _, status = self.prt_manager.query(status=True)
-            sub_data["msg"] = status
+            _, status = self.prt_manager.query()
+            st = {"status-code": status["status_code"],
+                    "status-desc": status["status-desc"],
+                    "device-uri": status["device-uri"],
+                    "device-state": status["device-state"],
+                    "err-state": status["err-statue"]}
+            sub_data["msg"] = st
         except PrtError as e:
             sub_data["code"] = e.code
             sub_data["msg"] = e.msg
@@ -158,7 +170,7 @@ class Controler(object):
             src, dst = kw["src"], kw["dst"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
-        
+
         server = "{user}@{ip}".format("pi", "127.0.0.1")
         dst = "{server}:{dst}".format(server, dst)
 
@@ -175,23 +187,59 @@ class Controler(object):
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
 
-        files = get_udisk(path) 
+        files = get_udisk(path)
 
         if files is None:
             raise code.FileUnEixstError()
 
         sub_data["msg"] = files
-        
+
         return sub_data
 
+    def register(self):
+        machine_id = get_machine_id()
+        machine_type = get_machine_type()
+        mac = get_hw_addr()
 
+        params = {"machine_id": machine_id,
+                  "machine_type": machine_type,
+                  "mac": mac}
+        while True:
+            res = self.cs.call("register", params)
+            status = res["status"]
+            register_id = res.get("machine_id", "")
+            if status == 0:
+                if register_id != machine_id:
+                    set_machine_id(register_id)
+                    return 
+                else:
+                    return
+
+
+    def report(self, params=False, status=True, force=False):
+        params, status = self.prt_manager.query()
+        if params:
+            pa = {"two-side":True,
+                    "colorful": False}
+            log.info("params: %s" % pa)
+            self.cs.call_async("report_printer_params", pa)
+        if status:
+            st = {"status-code": status["status_code"],
+                    "status-desc": status["status-desc"],
+                    "device-uri": status["device-uri"],
+                    "device-state": status["device-state"],
+                    "err-state": status["err-statue"]}
+            log.info("status: %s" % st)
+            if self.prt_st != st["status_code"] or force:
+                self.prt_st = st["status_code"]
+                self.cs.call_async("report_printer_status", st)
 
     def run(self, test=False):
         try:
             log.info("start".center(100, '-'))
-            self.init_server()
             self.before_work()
 
+            self.init_server()
             run_server()
 
             if test:
@@ -201,8 +249,7 @@ class Controler(object):
                 while not self._stop_event.is_set():
                     time.sleep(interval_time)
                     try:
-                        _,st = self.prt_manager.query()
-                        log.info(st)
+                        self.report(status=True)
                     except Exception as e:
                         log.warning(str(e))
 

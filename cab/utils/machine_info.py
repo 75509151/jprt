@@ -53,6 +53,9 @@ def set_file_content(file_path, content):
 def get_machine_id():
     return get_file_content(get_machine_home() + ".machineconfig/machine_id")
 
+def set_machine_id(machine_id):
+    set_file_content(get_machine_home() + ".machineconfig/machine_id", machine_id)
+
 
 def get_machine_name():
     return get_file_content(get_machine_home() + ".machineconfig/machine_name")
@@ -89,7 +92,7 @@ def get_machine_server(s_type, default_serve=""):
 
 
 def get_machine_home():
-    return get_file_content("/home/pi/.machineconfig/machine_home")
+    return os.environ["HOME"] 
 
 
 def get_machine_version():

@@ -78,9 +78,7 @@ class CallServer(threading.Thread):
         _type, size, codec = protocol.parse_head(head)
 
         if size > 0 and size < MAX_MESSAGE_LENGTH:
-            # print "request size:", size
             body = self.recvall(size)  # raise CommunicateException
-            print ("request body", body)
             try:
                 body = codec.decode(body)
             except Exception as ex:
@@ -112,7 +110,7 @@ class CallServer(threading.Thread):
                         except Exception as e: 
                             log.warning(str(e))
                             time.sleep(1)
-                self.on_recv()
+                    self.on_recv()
 
             except queue.Empty:
                 time.sleep(0.5)

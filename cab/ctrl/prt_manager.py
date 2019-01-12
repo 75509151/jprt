@@ -45,16 +45,18 @@ class PrtManager(object):
         except PrtSetupError as e:
             log.warning("install printer failed: %s" % str(e))
 
-    def query(self, params=False, status=False):
-        params, status = self.printer.query()
-        if params:
-            print("params: %s" % params)
-        if status:
-            print("status: %s" % status)
+    def query(self):
+        try:
+            params, status = self.printer.query()
+        except Exception as e:
+            log.warning("query: %s" % str(e))
+            params = None
+            st = {"status-code": 1019,
+                    "status-desc": "power down",
+                    "device-uri": "",
+                    "device-state": 0,
+                    "err-state": 0}
         return params, status
-
-    def report(self, params=True, status=True):
-        self.query(params, status)
 
     def print_file(self, document, num=1, colorful=False, sides="one-sided"):
         options = ""
@@ -82,7 +84,4 @@ if __name__ == "__main__":
     m = PrtManager()
     if m.need_install():
         m.install_printer()
-        m.report(params=True, status=True)
-    else:
-        print("not need install")
-        m.report(status=True)
+
