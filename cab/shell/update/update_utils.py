@@ -17,6 +17,55 @@ import time
 from . import update_exceptions as upex
 
 
+class PasswordException(Exception):
+    pass
+
+
+def rsync(src, dst, port, password, delete=False, log=None):
+    sshpass_cmd = "sshpass -p '{pwd}'".format(pwd=password)
+
+    rysnc_cmd = "rsync -avze 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p " \
+        "{port}' {src} {dst}".format(src=src,
+                                     dst=dst,
+                                     port=port)
+
+    cmd = "export PATH='$PATH:/usr/bin'; %s %s" % (sshpass_cmd, rysnc_cmd)
+
+    if delete:
+        cmd = "%s %s" % (cmd, "--delete")
+    if log:
+        log.info(cmd)
+
+    return_code = subprocess.call(cmd, shell=True)
+    if return_code == 5:
+        raise PasswordException()
+    if return_code:
+        raise RuntimeError("rysnc failed: %s" % return_code)
+
+
+# def rsync(src, dest, user, password, tunnel_addr, port, delete=False, log=None):
+    # sshpass_cmd = "sshpass -p '{pwd}'".format(pwd=password)
+
+    # rysnc_cmd = "rsync -avze 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p " \
+        # "{port}' {src} {user}@{tunnel_addr}:{dest}".format(src=src,
+        # user=user,
+        # tunnel_addr=tunnel_addr,
+        # dest=dest,
+        # port=port)
+
+    # cmd = "export PATH='$PATH:/usr/bin'; %s %s" % (sshpass_cmd, rysnc_cmd)
+
+    # if delete:
+        # cmd = "%s %s" % (cmd, "--delete")
+    # if log:
+        # log.info(cmd)
+
+    # return_code = subprocess.call(cmd, shell=True)
+    # if return_code == 5:
+        # raise PasswordException()
+    # if return_code:
+        # raise RuntimeError("rysnc failed: %s" % return_code)
+
 def check_and_creat_path(path):
     if not os.path.exists(path):
         os.makedirs(path)
@@ -65,8 +114,6 @@ class ProcessLock():
 
 def change_working_path(path):
     os.chdir(path)
-
-
 
 
 def cp_folder(source_path, dst_path):
@@ -122,7 +169,7 @@ def get_bool_input():
         elif choice in no:
             return False
         else:
-            print ("Please respond with 'yes' or 'no'")
+            print("Please respond with 'yes' or 'no'")
 
 
 def md5(fname):
@@ -147,10 +194,12 @@ def do_cmd(cmd, raise_ex=True):
 def get_cur_time(time_fmt="%Y-%m-%d %H:%M:%S"):
     return time.strftime(time_fmt)
 
+
 def set_machine_downloaded_version(version):
     from update_info import VERSION_DOWN
     with open(VERSION_DOWN, "w") as f:
         f.write(version)
+
 
 def get_machine_downloaded_version():
     from update_info import VERSION_DOWN
@@ -160,6 +209,7 @@ def get_machine_downloaded_version():
         return content
     else:
         return ""
+
 
 def set_machine_version(ver):
     """
@@ -171,6 +221,7 @@ def set_machine_version(ver):
             f.write(ver)
         with open("/home/mm/.kioskconfig/upgrade_time", 'w') as ff:
             ff.write(get_cur_time())
+
 
 def get_sys_ver():
     with open("/etc/issue", 'r') as f:
@@ -194,7 +245,6 @@ def set_file_content(file_path, content):
         f.write(content)
 
 
-
 def get_machine_name():
     return get_file_content(get_machine_home() + ".machineconfig/machine_name")
 
@@ -208,13 +258,13 @@ def get_machine_location():
 
 
 def set_machine_location(machine_location):
-    set_file_content(get_machine_home() +
-                     ".machineconfig/machine_location", machine_location)
+    set_file_content(get_machine_home()
+                     + ".machineconfig/machine_location", machine_location)
 
 
 def set_machine_server(machine_type, default_server=""):
-    set_file_content(get_machine_home() + ".machineconfig/machine_" +
-                     machine_type + "_server", default_server)
+    set_file_content(get_machine_home() + ".machineconfig/machine_"
+                     + machine_type + "_server", default_server)
 
 
 def get_machine_server(s_type, default_serve=""):

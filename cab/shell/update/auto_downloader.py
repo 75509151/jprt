@@ -19,6 +19,7 @@ import json
 import datetime
 
 
+
 class AutoDownloader(object):
     """docstring for AutoDownloader"""
 
@@ -30,11 +31,7 @@ class AutoDownloader(object):
         self.remote_version_file = REMOTE_VERSION
         self.initialize()
 
-    def _remove_kownhosts(self):
-        os.system("rm ~/.ssh/known_hosts")
-
     def initialize(self):
-        self._remove_kownhosts()
         try:
             if self.test is True:
                 self.server = TEST_SERVER["addr"]
@@ -44,7 +41,6 @@ class AutoDownloader(object):
                 self.server = REAL_SERVER["addr"]
                 self.user = REAL_SERVER["user"]
                 self.pwd = REAL_SERVER["password"]
-            self.generate_pwd_file()
         except KeyError as ex:
             self.log.error("Configuration file Error: %s" % str(ex))
             raise ConfigException("Configuration file Error: Update server")
@@ -52,13 +48,11 @@ class AutoDownloader(object):
             self.log.error("Exception caught when _initialize: %s" % str(ex))
             raise
 
-    def rsync_file(self, src, dest):
-        cmd = "rsync -az --password-file={pwd_file} {user}@{server}::update/{base_dir}/{src} {dest} ".format(
-            pwd_file=self.pwd_file, user=self.user, server=self.server, base_dir=REMOTE_UPDATE_BASE_DIR, src=src,
-            dest=dest)
-
-        self.log.info("do cmd: %s" % cmd)
-        call(cmd, shell=True)
+    def rsync_file(self, src, dst):
+        password = self.pwd
+        port= 22
+        real_src = "{user}@{server}:/{base_dir}/{src}".format(user=self.user, server=self.server, base_dir=REMOTE_UPDATE_BASE_DIR, src=src)
+        upu.rsync(real_src, dst,port=port, password=password, log=self.log)
 
     def get_remote_version_info(self):
         self.rsync_file("version", self.remote_version_file)
@@ -67,9 +61,6 @@ class AutoDownloader(object):
             info = json.load(f)
         return info
 
-    def generate_pwd_file(self):
-        os.system("echo %s > %s" % (self.pwd, self.pwd_file))
-        os.system("chmod 600 %s" % self.pwd_file)
 
     def get_need_download_version(self):
         allow_version_info = self.get_remote_version_info()
