@@ -10,6 +10,7 @@ import json
 import platform
 from urllib.request import urlopen
 from configparser import ConfigParser
+from cab import PRJ_DIR
 
 
 
@@ -201,7 +202,7 @@ def get_config(config_type):
     """
     if config_type == "ckc":
         config_file = os.path.join(
-            get_machine_home(), "jprt","cab", "config", "config.ini")
+            PRJ_DIR,"config", "config.ini")
     else:
         raise Exception("invalid config_type: %s" % config_type)
     config = ConfigParser()
@@ -210,3 +211,6 @@ def get_config(config_type):
 
 
 
+if __name__ == "__main__":
+    config = get_config("ckc")
+    print(config.get("db", "ckc_db"))
