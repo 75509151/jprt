@@ -47,7 +47,6 @@ error_type_zh = {
 email_EOL = "<br>"
 
 
-email_time_file = os.path.join(get_machine_home(), "var", "data", "email_time_file")
 
 
 def init_log(handle_name, file_name="", debug=False, rotate="size", count=5):
@@ -63,12 +62,6 @@ def init_log(handle_name, file_name="", debug=False, rotate="size", count=5):
                      debug, rotate, count=count)
     return log
 
-
-def get_logger(handle_name):
-    # return logging.getLogger(name=handle_name)
-    create_file = False
-    log = MachineLog(create_file, handle_name)
-    return log
 
 
 class UdpHandler(DatagramHandler):
@@ -90,7 +83,7 @@ class UdpHandler(DatagramHandler):
             }
             msg = json.dumps(msg)
             self.send(msg)
-        except (ExceptionKeyboardInterrupt, SystemExit):
+        except (KeyboardInterrupt, SystemExit):
             print("udp catch exception")
         except Exception:
             self.handleError(record)
@@ -119,7 +112,7 @@ class MachineLog(object):
             if not file_name:
                 file_name = handle_name
             logfile = os.path.join(
-                get_machine_home(), "var/log/%s.log" % file_name.lower())
+                os.environ["HOME"], "var/log/%s.log" % file_name.lower())
             path, f = os.path.split(logfile)
             if not os.path.exists(path):
                 os.makedirs(path)
