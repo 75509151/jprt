@@ -72,7 +72,7 @@ class ApiClient(ClientHandler):
 class ApiServer(Server):
 
     def __init__(self, address, client, ctrl):
-        super(ApiServer, self).__init__(address, client, ctrl)
+        super(ApiServer, self).__init__(address, client)
         self.ctrl = ctrl
 
     def handle_accept(self):
@@ -189,9 +189,9 @@ class Controler(object):
     def run(self, test=False):
         try:
             log.info("start".center(100, '-'))
+            self.init_server()
             self.before_work()
 
-            self.init_server()
             run_server()
 
             if test:
@@ -201,7 +201,8 @@ class Controler(object):
                 while not self._stop_event.is_set():
                     time.sleep(interval_time)
                     try:
-                        self.prt_manager.open()
+                        _,st = self.prt_manager.query()
+                        log.info(st)
                     except Exception as e:
                         log.warning(str(e))
 
