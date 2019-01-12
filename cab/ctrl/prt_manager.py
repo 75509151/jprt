@@ -79,11 +79,10 @@ class PrtManager(object):
 
 
 if __name__ == "__main__":
-    pudb.set_trace()
-    manager = PrtManager()
-    if manager.need_install():
-        manager.install_printer()
-        manager.report(params=True, status=True)
+    m = PrtManager()
+    if m.need_install():
+        m.install_printer()
+        m.report(params=True, status=True)
     else:
         print("not need install")
-        manager.report(status=True)
+        m.report(status=True)

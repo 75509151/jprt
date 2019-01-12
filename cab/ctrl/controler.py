@@ -72,7 +72,7 @@ class ApiClient(ClientHandler):
 class ApiServer(Server):
 
     def __init__(self, address, client, ctrl):
-        super(ApiServer, self).__init__(address, client, ctrl)
+        super(ApiServer, self).__init__(address, client)
         self.ctrl = ctrl
 
     def handle_accept(self):
