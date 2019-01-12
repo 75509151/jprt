@@ -205,15 +205,19 @@ class Controler(object):
                   "machine_type": machine_type,
                   "mac": mac}
         while True:
-            res = self.cs.call("register", params)
-            status = res["status"]
-            register_id = res.get("machine_id", "")
-            if status == 0:
-                if register_id != machine_id:
-                    set_machine_id(register_id)
-                    return 
-                else:
-                    return
+            try:
+                res = self.cs.call("register", params)
+                status = res["status"]
+                register_id = res.get("machine_id", "")
+                if status == 0:
+                    if register_id != machine_id:
+                        set_machine_id(register_id)
+                        return 
+                    else:
+                        return
+            except Exception as e:
+                log.warning("register: %s" % str(e))
+            time.sleep(5)
 
 
     def report(self, params=False, status=True, force=False):
