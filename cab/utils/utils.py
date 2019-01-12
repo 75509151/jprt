@@ -3,9 +3,38 @@ import os
 import subprocess
 import uuid
 import getpass
+import fcntl
 
 import magic
 from cab.services import code
+
+def file_lock(lock):
+    def handle_func(func):
+        def wrap(*args, **kw):
+            with open(lock, "r") as f:
+                fcntl.flock(f, fcntl.LOCK_EX)
+                try:
+                    ret = func(*args, **kw)
+                    return ret
+                finally:
+                    fcntl.flock(f, fcntl.LOCK_UN)
+        return wrap
+    return handle_func
+
+
+@file_lock(__file__)
+def get_ui_state():
+    try:
+        with open("/tmp/ui_state","r") as f:
+            return f.read().strip()
+    except:
+        return "hide"
+
+@file_lock(__file__)
+def set_ui_state(hide=False):
+    st = "hide" if hide else "show"
+    with open("/tmp/ui_state", "w") as f:
+        f.write(st)
 
 def get_mimetype(file_name):
     mime = magic.Magic(mime=True)

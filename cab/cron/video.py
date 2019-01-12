@@ -5,13 +5,13 @@ import pexpect
 import time
 import threading
 import os
-from cab.cutils.utils import (find_pid_by_process_key, ProcessLock, BaseTimer,
-                          TimerTask, get_ui_state,
+from cab.utils.utils import (get_ui_state,
                           run_in_thread)
-from cab.cutils.c_log import init_log
-from cab.cutils.machineinfo import get_config
+from cab.utils.c_log import init_log
+from cab.utils.machine_info import get_config
 from cab.db.dbm import get_db_instance
 from math import log as math_log
+from cab import PRJ_DIR
 
 __all__ = ["OmxPlayer"]
 
@@ -23,9 +23,12 @@ log = init_log("video")
 
 wx_width = 865
 
+screen_width = 1920
+screen_height = 1080
+
 pro = float(1920) / float(1080)
-mini_omx_h = int((G_OMX_SCREEN.get_w() - wx_width) / pro)
-mini_omx_y = int((G_OMX_SCREEN.get_h() - mini_omx_h) / 2)
+mini_omx_h = int((screen_width - wx_width) / pro)
+mini_omx_y = int((screen_height - mini_omx_h) / 2)
 
 
 def count_omx_vol(vol_percent):
@@ -41,7 +44,7 @@ def count_omx_vol(vol_percent):
 
 class OmxPlayer(object):
     """docstring for OmxPlayer"""
-    DBUS = G_OMXPLAYER_DBUS
+    DBUS = os.path.join(PRJ_DIR, "cab" ,"shell", "dbuscontrol.sh")
 
     (PAUSE_ST, PLAY_ST, IDLE_ST) = range(3)
 
@@ -59,7 +62,7 @@ class OmxPlayer(object):
         elif mode == "mini":
             cmd = 'omxplayer -o {output} --vol {vol} --no-osd --aspect-mode stretch --win {x},{y},{w},{h} {video}'.format(
                 x=1, y=mini_omx_y,
-                w=int(G_OMX_SCREEN.get_w()) - wx_width, h=mini_omx_h + mini_omx_y, video=video, output=output, vol=vol)
+                w=screen_width- wx_width, h=mini_omx_h + mini_omx_y, video=video, output=output, vol=vol)
         if loop:
             cmd = cmd.replace("omxplayer", "omxplayer --loop")
         log.info("mode: %s, %s" % (mode, cmd))
@@ -152,7 +155,7 @@ class VideoCtrl(object):
         if mode == "mini":
             OmxPlayer.set_aspectmode("stretch")
             OmxPlayer.set_video_pos(
-                1, mini_omx_y, int(G_OMX_SCREEN.get_w()) - wx_width, mini_omx_h + mini_omx_y)
+                1, mini_omx_y, screen_width - wx_width, mini_omx_h + mini_omx_y)
             # OmxPlayer.contin()
         elif mode == "full":
             OmxPlayer.set_aspectmode("stretch")
@@ -209,17 +212,19 @@ def main():
                 for name in files:
                     video = os.path.join(root, name)
                     if os.path.exists(video):
-                        omxplayer_output = db.get_kv(
-                            "machine_config", "omxplayer_output")
-                        omxplayer_volume = db.get_kv(
-                            "machine_config", "omxplayer_volume_percent")
+                        # omxplayer_output = db.get_kv(
+                            # "machine_config", "omxplayer_output")
+                        # omxplayer_volume = db.get_kv(
+                            # "machine_config", "omxplayer_volume_percent")
                         # TODO: need use video_ctrl to control play
-                        if not update_shape_start_flag:
-                            update_video_shape()
-                            update_shape_start_flag = True
-                        mode = "full" if get_ui_state() == "hide" else "mini"
+                        # if not update_shape_start_flag:
+                            # update_video_shape()
+                            # update_shape_start_flag = True
+                        # mode = "full" if get_ui_state() == "hide" else "mini"
+                        # OmxPlayer.play(
+                            # video, mode, vol_percent=omxplayer_volume, output=omxplayer_output, loop=True)
                         OmxPlayer.play(
-                            video, mode, vol_percent=omxplayer_volume, output=omxplayer_output, loop=True)
+                            video, "full", loop=True)
         except Exception as e:
             log.info("main err:%s" % str(e))
             time.sleep(1)
