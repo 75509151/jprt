@@ -1,9 +1,13 @@
 import os
+import sys
 import time
 import pexpect
+import site
+site.getsitepackages()
+sys.path.append("/usr/share/hplip")
 
 
-from base import device, status, utils, tui, module
+from base import device, status, utils, module
 from prnt import cups
 
 from cab.utils.console import embed

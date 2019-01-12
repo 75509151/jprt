@@ -17,7 +17,8 @@ CODE2MSG={
         UNKNOWN_API: "No Such API",
         MISS_FIELDS: "Miss Fields",
         INVALID_FIELDS: "Invalid Fields",
-        UNAVALIABLE_SERVICE: "Service Unavalible"
+        UNAVALIABLE_SERVICE: "Service Unavalible",
+        INTERNAL_ERROR: "Internal Error",
 
         }
 
