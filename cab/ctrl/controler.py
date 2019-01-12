@@ -9,7 +9,7 @@ from cab.utils.server import Server, run_server, ClientHandler
 from cab.utils.c_log import init_log
 from cab.utils.console import embed
 from cab.utils import constant as cst
-from cab.db.db_pool import DB_POOL as DBP
+#from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.server_api import CallServer, call_once
 from cab.services import code

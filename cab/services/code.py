@@ -54,6 +54,6 @@ class FileUnEixstError(InternalErr):
     code = UNEXIST_ERROR
     msg = "File does not exist"
 
-class UpoloadError(InternalErr):
-    code = UpoloadError
+class UploadError(InternalErr):
+    code = UPLOAD_ERROR
     msg = "Upload failed"
