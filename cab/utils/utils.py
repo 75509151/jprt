@@ -83,8 +83,10 @@ def upload_file(src, dst, retry=3, port=22, rename=True):
         ret = subprocess.call(cmd)
         if ret == 0:
             return
-    raise code.UpoloadError()
+    raise code.UploadError()
 
 
-
+def make_dirs(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
