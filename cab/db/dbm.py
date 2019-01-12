@@ -1,4 +1,5 @@
 import sqlite3
+import os
 import traceback
 
 from cab.utils.machine_info import get_config, get_cur_time
@@ -20,8 +21,8 @@ class DB(object):
         self.config = get_config("ckc")
         self.ckc_db_path = ckc_db_path if ckc_db_path else self.config.get("db", "ckc_db")
         self.sync_db_path = sync_db_path if sync_db_path else self.config.get("db", "sync_db")
-        makedirs(os.path.dirname(self.ckc_db_path))
-        makedirs(os.path.dirname(self.sync_db_path))
+        make_dirs(os.path.dirname(self.ckc_db_path))
+        make_dirs(os.path.dirname(self.sync_db_path))
         
         self._open_db()
 

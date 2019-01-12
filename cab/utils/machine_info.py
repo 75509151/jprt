@@ -9,7 +9,7 @@ import codecs
 import json
 import platform
 from urllib.request import urlopen
-from configparser import ConfigParser
+from configparser import SafeConfigParser
 from cab import PRJ_DIR
 
 
@@ -205,7 +205,7 @@ def get_config(config_type):
             PRJ_DIR,"config", "config.ini")
     else:
         raise Exception("invalid config_type: %s" % config_type)
-    config = ConfigParser()
+    config = SafeConfigParser(os.environ)
     config.read(config_file)
     return config
 
