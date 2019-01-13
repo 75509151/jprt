@@ -7,8 +7,7 @@ import fcntl
 
 import magic
 from cab.services import code
-from cab.utils.machine_info import get_machine_home
-
+from cab import PRJ_DIR 
 
 def file_lock(lock):
     def handle_func(func):
@@ -95,7 +94,7 @@ def get_root_pwd():
 
 
 def play_video(video):
-    video_path = os.path.join(get_machine_home(), "resources", "sounds", video)
+    video_path = os.path.join(PRJ_DIR, "resources", "sounds", video)
 
     cmd = "mplayer %s" % video_path
     os.system(cmd)
