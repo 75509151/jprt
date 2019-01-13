@@ -160,10 +160,10 @@ class Protocol(object):
             _id = str(req._id)
         codec = AgentCodec()
         body = codec.encode_request(_id, req._method_name, req._params)
-        l = len(body)
+        l = len(body) + 4
         # binary_body = struct.pack("%ss" % l, body)
         # print "body in request_to_raw: %s %s" % (l, body)
-        head = struct.pack(self.head_fmt, STX, req._type, len(body))
+        head = struct.pack(self.head_fmt, STX, req._type, l)
         # print "head in request_to_raw:", head
         request_bytes = head + body + self.tail
 
@@ -173,7 +173,8 @@ class Protocol(object):
         codec = AgentCodec()
         body = codec.encode_reply(reply._rid, reply._code, reply._msg, reply._data)
         # print "body in reply_to_raw: %s %s" % (l, body)
-        head = struct.pack(self.head_fmt, STX, reply._type, len(body))
+        l = len(body) + 4
+        head = struct.pack(self.head_fmt, STX, reply._type, l)
         # print "head in reply_to_raw:", head
         # return head + binary_body + self.tail
         return head + body + self.tail

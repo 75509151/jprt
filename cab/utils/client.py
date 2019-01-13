@@ -32,7 +32,7 @@ class Client(object):
             self.log.warning("connect failed: %s" % str(e))
             raise e
 
-    def send(self, data, retry=1):
+    def send(self, data, retry=3):
         with self.lock:
             err = None
             for i in range(retry):
@@ -73,10 +73,11 @@ if __name__ == '__main__':
 
     import json
     c = Client("127.0.0.1", 1507)
+    i = 0
     while True:
         # c.send(json.dumps({"t": 1}).encode(encoding='utf_8', errors='strict'))
         c.send(json.dumps({"t": 1}).encode())
-        c.send("1212".encode())
-        print("recv: %s" % c.recv())
+        print("recv: %s %s" % (i, c.recv()))
+        i += 1
         import time
         time.sleep(1)

@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from cab.services import code
 from cab.utils.server import Server, run_server, ClientHandler
@@ -15,6 +16,7 @@ from cab.utils.c_log import init_log
 
 log = init_log("remote_server", count=1)
 
+
 class ApiClient(ClientHandler):
 
     def __init__(self, sock, address):
@@ -23,20 +25,31 @@ class ApiClient(ClientHandler):
     def handle_read(self):
         self.on_recv()
 
+    # def recvall(self, size):
+        # """ recieve all. """
+        # try:
+        # s = size
+        # buf = b""
+        # while True:
+        # b = self.recv(s)
+        # buf = buf + b
+        # s = s - len(b)
+        # if s == 0 or not b:
+        # return buf
+        # except Exception as ex:
+        # raise CommunicateException("RecvALL Error:%s" % ex)
 
-    def recvall(self, size):
-        """ recieve all. """
-        try:
-            s = size
-            buf = b""
-            while True:
-                b = self.recv(s)
-                buf = buf + b
-                s = s - len(b)
-                if s == 0 or not b:
-                    return buf
-        except Exception as ex:
-            raise CommunicateException("RecvALL Error:%s" % ex)
+    def recvall(self, size, timeout=60):
+        recv_len = 0
+        data = b""
+        while recv_len < size:
+            try:
+                data += self.recv(size - recv_len)
+                recv_len = len(data)
+            except BlockingIOError:
+                pass
+
+        return data
 
     def reply_cli(self, req_id, func, params):
         try:
@@ -60,41 +73,39 @@ class ApiClient(ClientHandler):
                 "info": ""}
         return data
 
-
-
     def on_recv(self):
         """ recieve request and return reply. """
-        protocol = Protocol()
-        head_size = protocol.get_head_size()
-        head = self.recvall(head_size)
-        if len(head) != head_size:
-            raise CommunicateException("Connection closed by peer")
+        try:
+            protocol = Protocol()
+            head_size = protocol.get_head_size()
+            head = self.recvall(head_size)
+            if len(head) != head_size:
+                raise CommunicateException("Connection closed by peer")
 
-        _type, size, codec = protocol.parse_head(head)
+            _type, size, codec = protocol.parse_head(head)
 
-        if size > 0 and size < MAX_MESSAGE_LENGTH:
-            # print "request size:", size
-            body = self.recvall(size)  # raise CommunicateException
-            # print "request body", body
-            try:
-                body = codec.decode(body)
-            except Exception as ex:
-                e = "Decode Request Message Body Error: %s" % ex
-                log.error(e)
-                raise ProtocolException(e)
-        else:
-            raise CommunicateException("size error: " + str(size))
+            if size > 0 and size < MAX_MESSAGE_LENGTH:
+                # print "request size:", size
+                body = self.recvall(size)  # raise CommunicateException
+                print ("request body: %s" % body)
+                try:
+                    body = codec.decode(body[:-4])
+                except Exception as ex:
+                    e = "Decode Request Message Body Error: %s" % ex
+                    log.error(e)
+                    raise ProtocolException(e)
+            else:
+                raise CommunicateException("size error: " + str(size))
 
-        if _type == MSG_TYPE_REQUEST:
-            # break up the request
-            req_id, func_name, params = body["id"], body["func"], body["params"]
+            if _type == MSG_TYPE_REQUEST:
+                # break up the request
+                req_id, func_name, params = body["id"], body["func"], body["params"]
 
-            log.info("in %s(%s)" % (func_name, params))
-            self.reply_cli(req_id, func_name, params)
-            log.info("out %s(%s)" % (func_name, params))
-
-
-
+                log.info("in %s(%s)" % (func_name, params))
+                self.reply_cli(req_id, func_name, params)
+                log.info("out %s(%s)" % (func_name, params))
+        except Exception as e:
+            log.warning("on_recv: %s" % str(traceback.format_exc()))
 
 
 class ApiServer(Server):
@@ -104,7 +115,7 @@ class ApiServer(Server):
 
 
 if __name__ == "__main__":
-    
+
     api_server = ApiServer(("127.0.0.1", 5525), ApiClient)
     run_server()
     while True:

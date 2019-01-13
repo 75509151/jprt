@@ -38,28 +38,24 @@ class ClientHandler(asyncore.dispatcher):
 
     def __init__(self, sock, address):
         asyncore.dispatcher.__init__(self, sock)
-        self.data_to_write = ""
-        self.data = ""
+        self.data_to_write = b""
+        self.data = b""
 
     def writable(self):
         return (len(self.data_to_write)>0)
 
     def handle_write(self):
+        #TODO: unsafe  
         try:
-            try:
-                sent = self.send(self.data_to_write)
-            except UnicodeDecodeError:
-                sent = self.send(self.data_to_write)
-            log.info("send: %s" % self.data_to_write[:sent])
+            sent = self.send(self.data_to_write)
             self.data_to_write = self.data_to_write[sent:]
-        except Exception:
+        except Exception as e:
             log.warning("send error: %s" % str(traceback.format_exc()))
-            raise
+            raise e
 
     def handle_read(self):
-        #TODO: unsafe
         data = self.recv(8096)
-        self.data_to_write = data
+        self.data_to_write+=data
         print("data_to_write:%s" % self.data_to_write)
 
 
