@@ -39,8 +39,9 @@ def usb_monitor():
 
 def set_wiif_config(user_config, sys_config):
     pwd = get_root_pwd() 
-    cmd = "echo '{pwd}' | sudo -S cp {user_config} {sys_config}".format(user_config, sys_config)
-    ret = subprocess.call(cmd)
+    cmd = "echo '{pwd}' | sudo -S cp '{user_config}' '{sys_config}'".format(pwd=pwd, 
+            user_config=user_config, sys_config=sys_config)
+    ret = subprocess.call(cmd, shell=True)
     log.info("set_wiif_config: %s" % ret)
     return ret
 
