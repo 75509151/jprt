@@ -18,8 +18,8 @@ def usb_monitor():
         try:
             udisk_paths = get_udisk_path()
             if not udisk_paths:
-                usb_disconnet = True
-            elif usb_disconnet is False:
+                udisk_exist = True
+            elif udisk_exist is False:
                 for disk_path in udisk_paths:
                     user_conf = os.path.join(disk_path, wifi_conf)
                     if os.path.isfile(user_conf):
@@ -27,8 +27,10 @@ def usb_monitor():
                             play_video("please_reboot.mp3")
                         else:
                             play_video("config_failed.mp3")
+                    else:
+                        log.info("wifi.ini does not exist in: %s" % disk_path)
 
-                usb_disconnet = True
+                udisk_exist = True
 
         except Exception as e:
             log.warning("usb_monitor: %s" % str(traceback.format_exc()))

@@ -70,15 +70,18 @@ def get_extern_if(obj, cmd):
     return None
 
 
-def get_udisk_path():
+def get_udisk_path(abs_path=True):
     udisk_mount_path = os.path.join("/media/", getpass.getuser())
     udisk_paths = os.listdir(udisk_mount_path)
-    return udisk_paths
+    if abs_path and udisk_paths:
+        return [os.path.join(udisk_mount_path, disk_path) for disk_path in udisk_paths]
+    else:
+        return udisk_paths
 
 
 def get_udisk(sub_path="/", suffix=None, abs_path=False):
     # TODO: only one udisk exist
-    udisk_paths = get_udisk_path()
+    udisk_paths = get_udisk_path(abs_path)
     if not udisk_paths or len(udisk_paths) > 1:
         return None
 
