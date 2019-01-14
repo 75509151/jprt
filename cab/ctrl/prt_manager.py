@@ -62,7 +62,7 @@ class PrtManager(object):
         except Exception as e:
             log.warning("query: %s" % str(e))
             params = None
-            st = {"status-code": 1019,
+            status = {"status-code": 1019,
                     "status-desc": "power down",
                     "device-uri": "",
                     "device-state": 0,
