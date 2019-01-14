@@ -51,6 +51,8 @@ class ApiClient(ClientHandler):
             protocol = Protocol()
             msg = protocol.reply_to_raw(reply)
             self.send(msg)
+            print("send: %s" % msg)
+            log.info("send: %s" % msg)
         except Exception as e:
             log.warning("reply_cli: %s" % str(e))
 
@@ -74,11 +76,11 @@ class ApiClient(ClientHandler):
             _type, size, codec = protocol.parse_head(head)
 
             if size > 0 and size < MAX_MESSAGE_LENGTH:
-                # print "request size:", size
                 body = self.recvall(size)  # raise CommunicateException
-                print ("request body: %s" % body)
                 try:
+                    print("recv raw: %s" % body)
                     body = codec.decode(body[:-4])
+                    log.info("recv: %s" % body)
                 except Exception as ex:
                     e = "Decode Request Message Body Error: %s" % ex
                     log.error(e)
