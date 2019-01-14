@@ -56,7 +56,7 @@ class CallCab(threading.Thread):
             s = size
             buf = ""
             while True:
-                b = self.cli.recv(s, init_sock=True)
+                b = self.cli.recv(s)
                 buf = buf + b
                 s = s - len(b)
                 if s == 0 or not b:
@@ -78,7 +78,7 @@ class CallCab(threading.Thread):
             body = self.recvall(size)  # raise CommunicateException
             # print "request body", body
             try:
-                body = codec.decode(body)
+                body = codec.decode(body[:-4])
             except Exception as ex:
                 e = "Decode Request Message Body Error: %s" % ex
                 log.error(e)
@@ -108,7 +108,7 @@ class CallCab(threading.Thread):
                 try:
                     self.cab_cli.send(json.dumps({"func": func_name,
                                                   "params": params}))
-                    recv_data = self.cab_cli.recv()
+                    recv_data = self.cab_cli.recv(80960)
 
                     recv_data_dic = json.loads(sub_data)
 
@@ -126,7 +126,7 @@ class CallCab(threading.Thread):
             log.info("out %s(%s)" % (func_name, params))
 
             reply_msg = code.CODE2MSG.get(reply_code, "Unknown Error")
-            sub_data = json.dumps({}) if not sub_data else json.dump(sub_data)
+            sub_data = json.dumps({}) if not sub_data else json.dumps(sub_data)
             reply = Reply(req_id, reply_code, reply_msg, sub_data)
 
             msg = protocol.reply_to_raw(reply)

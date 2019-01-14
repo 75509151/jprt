@@ -11,7 +11,7 @@ _log = init_log("client", count=1)
 
 
 class Client(object):
-    #TODO: 
+    #TODO:
 
     def __init__(self, serv_addr, serv_port, log=None):
         self.lock = threading.Lock()
@@ -22,12 +22,12 @@ class Client(object):
         self.log = log if log else _log
 
     def init_sock(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.connect((self.serv_addr, self.serv_port))
             self.log.debug("connected ")
-        except Exception as e:
+        except socket.error as e:
             self.sock = None
             self.log.warning("connect failed: %s" % str(e))
             raise e
@@ -42,20 +42,26 @@ class Client(object):
                     ret = self.sock.sendall(data)
                     self.log.info("send: %s " % data)
                     return ret
-                except Exception as e:
+                except socket.error as e:
+                    err = e
                     self.sock = None
                     self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
-                    err = e
                     continue
+
+                except Exception as e:
+                    self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
+                    err = e
+                    break
             raise err
 
-    def recv(self, msg_len=80960,timeout=None, init_sock= False):
-        if not self.sock and init_sock:
-            self.init_sock()
+    def recv(self, size):
+        return self.sock.recv(size)
 
+
+    def recv_with_timeout(self, size=80960,timeout=None):
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
         if self.sock in fd_in:
-            data = self.sock.recv(msg_len)
+            data = self.sock.recv(size)
             self.log.info("recv: %s" % data)
             return data
         return None
@@ -77,7 +83,7 @@ if __name__ == '__main__':
     while True:
         # c.send(json.dumps({"t": 1}).encode(encoding='utf_8', errors='strict'))
         c.send(json.dumps({"t": 1}).encode())
-        print("recv: %s %s" % (i, c.recv()))
+        print("recv: %s %s" % (i, c.recv(8096)))
         i += 1
         import time
         time.sleep(1)

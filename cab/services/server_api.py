@@ -35,7 +35,7 @@ def call_once(func, params=None, timeout=60):
     r = Request(func, params)
     _id, data = Protocol().request_to_raw(r)
     cli.send(data)
-    cli.recv(timeout=6)
+    cli.recv(80960)
     cli.close()
 
     return
@@ -95,7 +95,7 @@ class CallServer(threading.Thread):
                     raise ProtocolException(e)
             else:
                 raise CommunicateException("size error: " + str(size))
-            
+
             if _type == MSG_TYPE_REPLY:
                 log.info("recv : %s" % body)
             else:
@@ -104,7 +104,7 @@ class CallServer(threading.Thread):
         except Exception as e:
             log.warning("on_recv: %s" % str(traceback.format_exc()))
 
- 
+
 
     def run(self):
         recv_time_out = 60
@@ -117,19 +117,19 @@ class CallServer(threading.Thread):
                         try:
                             self.cli.send(data)
                             break
-                        except Exception as e: 
+                        except Exception as e:
                             log.warning(str(e))
                             time.sleep(1)
                     self.on_recv()
 
             except queue.Empty:
                 time.sleep(0.5)
-            except Exception as e: 
+            except Exception as e:
                 log.warning(str(e))
 
 
 if __name__ =="__main__":
     cs = CallServer()
     embed()
-    
+
 

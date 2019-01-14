@@ -68,7 +68,7 @@ class ApiClient(ClientHandler):
             body = self.recvall(size)  # raise CommunicateException
             # print "request body", body
             try:
-                body = codec.decode(body)
+                body = codec.decode(body[:-4])
             except Exception as ex:
                 e = "Decode Request Message Body Error: %s" % ex
                 log.error(e)
