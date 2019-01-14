@@ -29,16 +29,19 @@ class ApiClient(ClientHandler):
         self.on_recv()
 
     def recvall(self, size, timeout=60):
-        recv_len = 0
+        s = size
         data = b""
-        while recv_len < size:
+        while True:
             try:
-                data += self.recv(size - recv_len)
-                recv_len = len(data)
+                d = self.recv(s)
+                data += d
+                s -= len(d)
+                if s==0 or not d:
+                    return data
+
             except BlockingIOError:
                 pass
 
-        return data
 
     def reply_cli(self, req_id, func, params):
         try:

@@ -152,11 +152,11 @@ class Controler(object):
                     "msg": ""}
         try:
             _, status = self.prt_manager.query()
-            st = {"status-code": status["status_code"],
+            st = {"status-code": status["status-code"],
                     "status-desc": status["status-desc"],
                     "device-uri": status["device-uri"],
                     "device-state": status["device-state"],
-                    "err-state": status["err-statue"]}
+                    "err-state": status["err-state"]}
             sub_data["msg"] = st
         except PrtError as e:
             sub_data["code"] = e.code
@@ -234,14 +234,14 @@ class Controler(object):
             log.info("params: %s" % pa)
             self.cs.call_async("report_printer_params", pa)
         if status:
-            st = {"status-code": status["status_code"],
+            st = {"status-code": status["status-code"],
                     "status-desc": status["status-desc"],
                     "device-uri": status["device-uri"],
                     "device-state": status["device-state"],
-                    "err-state": status["err-statue"]}
+                    "err-state": status["err-state"]}
             log.info("status: %s" % st)
-            if self.prt_st != st["status_code"] or force:
-                self.prt_st = st["status_code"]
+            if self.prt_st != st["status-code"] or force:
+                self.prt_st = st["status-code"]
                 self.cs.call_async("report_printer_status", st)
 
     def run(self, test=False):
