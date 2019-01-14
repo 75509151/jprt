@@ -66,7 +66,7 @@ class PrtManager(object):
                     "status-desc": "power down",
                     "device-uri": "",
                     "device-state": 0,
-                    "err-state": 0}
+                    "error-state": 0}
         return params, status
 
     def print_file(self, document, num=1, colorful=False, sides="one-sided"):

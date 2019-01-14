@@ -156,7 +156,7 @@ class Controler(object):
                     "status-desc": status["status-desc"],
                     "device-uri": status["device-uri"],
                     "device-state": status["device-state"],
-                    "err-state": status["err-state"]}
+                    "error-state": status["error-state"]}
             sub_data["msg"] = st
         except PrtError as e:
             sub_data["code"] = e.code
@@ -238,7 +238,7 @@ class Controler(object):
                     "status-desc": status["status-desc"],
                     "device-uri": status["device-uri"],
                     "device-state": status["device-state"],
-                    "err-state": status["err-state"]}
+                    "error-state": status["error-state"]}
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
                 self.prt_st = st["status-code"]
