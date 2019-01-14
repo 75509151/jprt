@@ -2,6 +2,7 @@ import time
 import traceback
 
 from cab.services import code
+from cab.utils.machine_info import get_config
 from cab.utils.server import Server, run_server, ClientHandler
 from cab.services.protocol import (Protocol, Request,
                                    Reply,
@@ -16,6 +17,8 @@ from cab.utils.c_log import init_log
 
 log = init_log("remote_server", count=1)
 
+c2r_server = get_config("ckc").get("server", "c2r_server") 
+c2r_port = get_config("ckc").getint("server", "c2r_port") 
 
 class ApiClient(ClientHandler):
 
@@ -24,20 +27,6 @@ class ApiClient(ClientHandler):
 
     def handle_read(self):
         self.on_recv()
-
-    # def recvall(self, size):
-        # """ recieve all. """
-        # try:
-        # s = size
-        # buf = b""
-        # while True:
-        # b = self.recv(s)
-        # buf = buf + b
-        # s = s - len(b)
-        # if s == 0 or not b:
-        # return buf
-        # except Exception as ex:
-        # raise CommunicateException("RecvALL Error:%s" % ex)
 
     def recvall(self, size, timeout=60):
         recv_len = 0
@@ -116,7 +105,7 @@ class ApiServer(Server):
 
 if __name__ == "__main__":
 
-    api_server = ApiServer(("127.0.0.1", 5525), ApiClient)
+    api_server = ApiServer(("127.0.0.1", c2r_port), ApiClient)
     run_server()
     while True:
         time.sleep(2)
