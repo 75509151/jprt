@@ -28,6 +28,7 @@ from cab.utils.machine_info import (get_machine_id,
 
 log = init_log("ctl")
 
+cab_port = get_config("ckc").getint("server", "cab_port") 
 
 class ApiClient(ClientHandler):
     def __init__(self, sock, address, ctrl):
@@ -101,7 +102,7 @@ class Controler(object):
         log.info("catch signal: %s, %s" % (signum, frame))
 
     def init_server(self):
-        self.serv = ApiServer(("0.0.0.0", cst.G_CTRL_PORT), ApiClient, self)
+        self.serv = ApiServer(("0.0.0.0", cab_port), ApiClient, self)
 
     def before_work(self):
         self.register()
