@@ -5,7 +5,7 @@ import update_utils as upu
 
 PYTHON_PATH = "python3"
 
-UPDATE_lOG = init_log()
+UPDATE_lOG = upu.init_log()
 
 UPDATE_FOLDER = os.path.join(upu.get_machine_home(), "update")
 VERSION_DOWN = os.path.join(UPDATE_FOLDER, "version")

@@ -73,7 +73,7 @@ def check_and_creat_path(path):
 
 def init_log():
     log = logging.getLogger('auto_update')
-    log_path = os.path.join("/home/pi/var/log")
+    log_path = os.path.join(os.environ["HOME"],"var/log")
     check_and_creat_path(log_path)
     log_file = os.path.join(log_path, "update.log")
     handle = logging.FileHandler(log_file)
