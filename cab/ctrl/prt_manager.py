@@ -1,4 +1,5 @@
 import json
+import os
 import pudb
 
 from prnt import cups
@@ -25,17 +26,25 @@ class PrtManager(object):
     def need_install(self):
         exist_uris = self.discovery_uris()
         if not exist_uris:
+            log.info("no printer connect")
             return False
 
         if not self.printer.device_uri:
             log.info("need new install: %s" % exist_uris)
             return True
 
-        if self.printer.device_uri not in exist_uris and self.printer.dev is None:
+        if self.printer.device_uri not in exist_uris:
+            #TODO: not pythonic
+            self.delete_printer(self.printer.name)
             log.info("need install for other: %s" % exist_uris)
             return True
 
         return False
+
+    def delete_printer(self, name):
+        ret = os.system("lpadmin -x '%s'" % name)
+        log.warning("delete printer: %s, ret: %s" % (name, ret))
+
 
     def install_printer(self):
         try:
@@ -48,6 +57,8 @@ class PrtManager(object):
     def query(self):
         try:
             params, status = self.printer.query()
+            log.info("params: %s" % param)
+            log.info("status: %s" % status)
         except Exception as e:
             log.warning("query: %s" % str(e))
             params = None
