@@ -20,18 +20,14 @@ from cab.services.protocol import (Protocol, Request,
 
 __all__ = ["call_once", "CallServer"]
 
-if get_config("ckc").get("main", "test") == "False":
-    HOST = "127.0.0.1"
-    PORT = 5525
-else:
-    HOST = "127.0.0.1"
-    PORT = 5525
+c2r_server = get_config("ckc").get("server", "c2r_server") 
+c2r_port = get_config("ckc").getint("server", "c2r_port") 
 
 log = init_log("server_api")
 
 
 def call_once(func, params=None, timeout=60):
-    cli = Client(HOST, PORT)
+    cli = Client(c2r_server, c2r_port)
     r = Request(func, params)
     _id, data = Protocol().request_to_raw(r)
     cli.send(data)
@@ -46,7 +42,7 @@ class CallServer(threading.Thread):
     def __init__(self):
         super(CallServer, self).__init__()
         self.lock = threading.Lock()
-        self.cli = Client(HOST, PORT)
+        self.cli = Client(c2r_server, c2r_port)
         self.task = queue.Queue()
 
     def call(self, func, params=None, timeout=60):

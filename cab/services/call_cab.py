@@ -15,16 +15,14 @@ from cab.services.protocol import (Protocol, Request,
                                    MSG_TYPE_REQUEST)
 from cab.utils.client import Client
 from cab.utils.c_log import init_log
-# from cab.utils.machine_info import  get_server
+from cab.utils.machine_info import get_config
 
 
-# HOST = "127.0.0.1"
-HOST = "127.0.0.1"
-PORT = 1507
+r2c_server = get_config("ckc").get("server", "r2c_server") 
+r2c_port = get_config("ckc").getint("server", "r2c_port") 
 
-cab_host = "127.0.0.1"
-cab_port = 1507
-
+cab_host = get_config("ckc").get("server", "cab_server") 
+cab_port = get_config("ckc").getint("server", "cab_port") 
 
 log = init_log("call_cab")
 
@@ -35,8 +33,8 @@ class CallCab(threading.Thread):
         super(CallCab, self).__init__()
         self.call_module_path = call_module_path
         self.stop = threading.Event()
-        self.cli = Client(HOST, PORT)
-        self.cab_cli = Client(HOST, PORT)
+        self.cli = Client(r2c_server, r2c_port)
+        self.cab_cli = Client(cab_host, cab_port)
 
     def run(self):
 
