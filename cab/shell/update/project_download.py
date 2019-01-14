@@ -10,8 +10,8 @@ import os
 
 import json
 
-from . import update_exceptions as upex
-from . import update_utils as upu 
+import update_exceptions as upex
+import update_utils as upu 
 from update_info import (REAL_SERVER, TEST_SERVER, UPDATE_FOLDER, UPDATE_PWD_FILE, UPDATE_lOG,
                          DOWNLOAD_LOCK_PATH, REMOTE_UPDATE_BASE_DIR)
 

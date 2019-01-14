@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 
-from . import update_utils as upu
+import update_utils as upu
 
 PYTHON_PATH = "python3"
 

@@ -14,7 +14,7 @@ import codecs
 import fcntl
 import time
 
-from . import update_exceptions as upex
+import update_exceptions as upex
 
 
 class PasswordException(Exception):
