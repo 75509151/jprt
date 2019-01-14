@@ -22,6 +22,7 @@ __all__ = ["call_once", "CallServer"]
 
 c2r_server = get_config("ckc").get("server", "c2r_server") 
 c2r_port = get_config("ckc").getint("server", "c2r_port") 
+print("%s %s"% (c2r_server, c2r_port))
 
 log = init_log("server_api")
 
