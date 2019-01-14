@@ -22,6 +22,7 @@ from cab.utils.utils import (get_extern_if,
 from cab.prts.prt_exceptions import PrtError
 from cab.utils.machine_info import (get_machine_id,
                                     get_machine_type,
+                                    get_config,
                                     get_hw_addr,
                                     set_machine_id)
 
