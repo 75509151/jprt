@@ -92,7 +92,7 @@ def get_machine_server(s_type, default_serve=""):
 
 
 def get_machine_home():
-    return os.environ["HOME"] 
+    return os.environ["HOME"] + "/"
 
 
 def get_machine_version():
