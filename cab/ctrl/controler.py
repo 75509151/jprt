@@ -209,14 +209,18 @@ class Controler(object):
         while True:
             try:
                 res = self.cs.call("register", params)
-                status = res["status"]
-                register_id = res.get("machine_id", "")
-                if status == 0:
-                    if register_id != machine_id:
-                        set_machine_id(register_id)
-                        return 
-                    else:
-                        return
+                log.info("register: %s" % res)
+                code = res["code"]
+                if code == 0:
+                    data = res["data"]
+                    status = data["status"]
+                    register_id = data.get("machine_id", "")
+                    if status == 0:
+                        if register_id != machine_id:
+                            set_machine_id(register_id)
+                            return 
+                        else:
+                            return
             except Exception as e:
                 log.warning("register: %s" % str(e))
             time.sleep(5)
