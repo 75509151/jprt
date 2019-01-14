@@ -57,7 +57,7 @@ class PrtManager(object):
     def query(self):
         try:
             params, status = self.printer.query()
-            log.info("params: %s" % param)
+            log.info("params: %s" % params)
             log.info("status: %s" % status)
         except Exception as e:
             log.warning("query: %s" % str(e))
