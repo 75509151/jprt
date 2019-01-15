@@ -70,13 +70,26 @@ class PrtManager(object):
         return params, status
 
     def print_file(self, document, num=1, colorful=False, sides="one-sided"):
-        options = ""
-        # if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
-        # log.info("office")
-        # if office.print_file(document, self.name):
-        # raise PrtPrintError("print file error")
+        """
+   	-o sides=one-sided
+            Prints on one side of the paper.
+
+        -o sides=two-sided-long-edge
+            Prints on both sides of the paper for portrait output.
+
+       	-o sides=two-sided-short-edge
+        """
+        all_jobs = cups.getAllJobs() 
+        log.info("all jobs: %s" % len(all_jobs))
+
+        options = "-#{num} -o sides={sides} ".format(num=num, sides=sides)
 
         self.printer.print_file(document, options, remove=True)
+        all_jobs = cups.getAllJobs() 
+        if all_jobs:
+            log.info("now all jobs: %s, new job-id: %s" % (len(all_jobs), all_jobs[-1].job_id))
+        else:
+            log.info("now all jobs: %s " % (len(all_jobs)))
 
     def report_print_result(self):
         pass
