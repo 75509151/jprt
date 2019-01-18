@@ -8,6 +8,7 @@ import time
 STX = 0x66554433
 ETX = 0x77889911
 
+MSG_TYPE_HEART = 0x00
 MSG_TYPE_REQUEST = 0x01
 MSG_TYPE_REPLY = 0x02
 MSG_TYPE_BATCH_REQUEST = 0x03
@@ -102,6 +103,14 @@ class AgentCodec(AgentBase):
         except Exception as ex:
             raise CodecException(str(ex))
 
+    def encode_heart(self, machine_id):
+        try:
+            return json.dumps({"id": machine_id,
+                               }).encode()
+        except Exception as ex:
+            raise CodecException(str(ex))
+
+
     def encode_reply(self, _id, code, msg="", data=""):
         try:
             return json.dumps({"id": _id,
@@ -129,6 +138,14 @@ class Request(AgentBase):
         self._params = params
         self._one_way = one_way
         self._type = _type
+
+class HeartBeat(AgentBase):
+    """ HeartBeat """
+
+    def __init__(self, machine_id, _type=MSG_TYPE_HEART):
+        AgentBase.__init__(self)
+        self._machine_id = machine_id
+
 
 
 class Reply(AgentBase):
@@ -178,6 +195,14 @@ class Protocol(object):
         # print "head in reply_to_raw:", head
         # return head + binary_body + self.tail
         return head + body + self.tail
+
+    def heart_to_raw(self, heart):
+        codec = AgentCodec()
+        body = codec.encode_heart(heart._machine_id)
+        l = len(body) + 4
+        head = struct.pack(self.head_fmt, STX, heart._type, l)
+        return head+body+self.tail
+
 
     def parse_head(self, head):
         try:

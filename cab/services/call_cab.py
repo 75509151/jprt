@@ -6,7 +6,7 @@ import json
 
 from cab.services import code
 from cab.services.protocol import (Protocol, Request,
-                                   Reply,
+                                   Reply, HeartBeat,
                                    CommunicateException,
                                    ProtocolException,
                                    UserException,
@@ -15,14 +15,15 @@ from cab.services.protocol import (Protocol, Request,
                                    MSG_TYPE_REQUEST)
 from cab.utils.client import Client
 from cab.utils.c_log import init_log
-from cab.utils.machine_info import get_config
+from cab.utils.utils import run_in_thread
+from cab.utils.machine_info import get_config, get_machine_id
 
 
-r2c_server = get_config("ckc").get("server", "r2c_server") 
-r2c_port = get_config("ckc").getint("server", "r2c_port") 
+r2c_server = get_config("ckc").get("server", "r2c_server")
+r2c_port = get_config("ckc").getint("server", "r2c_port")
 
-cab_host = get_config("ckc").get("server", "cab_server") 
-cab_port = get_config("ckc").getint("server", "cab_port") 
+cab_host = get_config("ckc").get("server", "cab_server")
+cab_port = get_config("ckc").getint("server", "cab_port")
 
 log = init_log("call_cab")
 
@@ -31,13 +32,31 @@ class CallCab(threading.Thread):
 
     def __init__(self, call_module_path):
         super(CallCab, self).__init__()
+        self.lock = threading.Lock()
         self.call_module_path = call_module_path
         self.stop = threading.Event()
-        self.cli = Client(r2c_server, r2c_port)
+        self.remote_cli = Client(r2c_server, r2c_port)
         self.cab_cli = Client(cab_host, cab_port)
 
-    def run(self):
+    @run_in_thread
+    def _heart_beat(self):
 
+        while True:
+            try:
+                r = HeartBeat(get_machine_id())
+                data = Protocol().heart_to_raw(r)
+                self.send_to_remote(data)
+            except Exception as e:
+                log.warning("heatbeat: %s" % str(e))
+                time.sleep(1)
+            else:
+                time.sleep(60)
+
+    def send_to_remote(self, data):
+        with self.lock:
+            self.remote_cli.send(data)
+
+    def run(self):
         while not self.stop.isSet():
             try:
                 self.on_recv()
@@ -54,7 +73,7 @@ class CallCab(threading.Thread):
             s = size
             buf = ""
             while True:
-                b = self.cli.recv(s)
+                b = self.remote_cli.recv(s)
                 buf = buf + b
                 s = s - len(b)
                 if s == 0 or not b:
@@ -129,7 +148,7 @@ class CallCab(threading.Thread):
 
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
-            self.cli.send(msg)  # CommunicateException
+            self.send_to_remote(msg)
         else:
             log.error("Unknown Message Ignoring...")
 
@@ -138,6 +157,7 @@ if __name__ == "__main__":
 
     try:
         call_cab = CallCab("cab.ckservice.cab_api")
+        call_cab._heart_beat()
         call_cab.start()
     except Exception as ex:
         log.error("error in main: %s" % ex)

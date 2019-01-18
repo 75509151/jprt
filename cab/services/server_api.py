@@ -6,8 +6,8 @@ import time
 from cab.utils.client import Client
 from cab.utils.console import embed
 from cab.utils.c_log import init_log
-from cab.utils.machine_info import get_config
-from cab.services.protocol import (Protocol, Request,
+from cab.utils.machine_info import get_config, get_machine_id
+from cab.services.protocol import (Protocol, Request, HeartBeat,
                                    Reply,
                                    MSG_TYPE_REPLY,
                                    CommunicateException,
@@ -20,9 +20,9 @@ from cab.services.protocol import (Protocol, Request,
 
 __all__ = ["call_once", "CallServer"]
 
-c2r_server = get_config("ckc").get("server", "c2r_server") 
-c2r_port = get_config("ckc").getint("server", "c2r_port") 
-print("%s %s"% (c2r_server, c2r_port))
+c2r_server = get_config("ckc").get("server", "c2r_server")
+c2r_port = get_config("ckc").getint("server", "c2r_port")
+print("%s %s" % (c2r_server, c2r_port))
 
 log = init_log("server_api")
 
@@ -101,13 +101,20 @@ class CallServer(threading.Thread):
         except Exception as e:
             log.warning("on_recv: %s" % str(traceback.format_exc()))
 
-
+    def _heart_beat(self):
+        try:
+            with self.lock:
+                r = HeartBeat(get_machine_id())
+                data = Protocol().heart_to_raw(r)
+                self.cli.send(data)
+        except Exception as e:
+            log.warning("heatbeat: %s" % str(e))
 
     def run(self):
-        recv_time_out = 60
+        self._heart_beat()
         while True:
             try:
-                request = self.task.get(timeout=1)
+                request = self.task.get(timeout=60)
                 _id, data = Protocol().request_to_raw(request)
                 with self.lock:
                     while True:
@@ -120,13 +127,11 @@ class CallServer(threading.Thread):
                     self.on_recv()
 
             except queue.Empty:
-                time.sleep(0.5)
+                self._heart_beat()
             except Exception as e:
                 log.warning(str(e))
 
 
-if __name__ =="__main__":
+if __name__ == "__main__":
     cs = CallServer()
     embed()
-
-

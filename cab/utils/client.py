@@ -9,9 +9,8 @@ from cab.utils.c_log import init_log
 _log = init_log("client", count=1)
 
 
-
 class Client(object):
-    #TODO:
+    # TODO:
 
     def __init__(self, serv_addr, serv_port, log=None):
         self.lock = threading.Lock()
@@ -57,15 +56,17 @@ class Client(object):
     def recv(self, size):
         return self.sock.recv(size)
 
+    def readable(self, timeout=None):
+        fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
+        return True if self.sock in fd_in else False
 
-    def recv_with_timeout(self, size=80960,timeout=None):
+    def recv_with_timeout(self, size=80960, timeout=None):
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
         if self.sock in fd_in:
             data = self.sock.recv(size)
             self.log.info("recv: %s" % data)
             return data
         return None
-
 
     def close(self):
         if self.sock:
