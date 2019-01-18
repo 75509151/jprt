@@ -29,7 +29,7 @@ from cab.utils.machine_info import (get_machine_id,
 
 log = init_log("ctl")
 
-cab_port = get_config("ckc").getint("server", "cab_port") 
+cab_port = get_config("ckc").getint("server", "cab_port")
 
 class ApiClient(ClientHandler):
     def __init__(self, sock, address, ctrl):
@@ -113,7 +113,6 @@ class Controler(object):
                 self.prt_manager.install_printer()
         except Exception as e:
             log.warning(str(traceback.format_exc()))
-        
         self.report(params=True, status=True)
 
     @extern_if
@@ -218,7 +217,7 @@ class Controler(object):
                     if status == 0:
                         if register_id != machine_id:
                             set_machine_id(register_id)
-                            return 
+                            return
                         else:
                             return
             except Exception as e:
