@@ -11,13 +11,13 @@ from cab.utils.console import embed
 from cab.utils import constant as cst
 #from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
-from cab.services.web_api import register, report_printer_params, report_printer_status
+from cab.services.web_api import (register, report_printer_params, report_printer_status,
+                                  upload_file)
 # from cab.services.server_api import CallServer, call_once
 from cab.services import code
 from cab.utils.utils import (get_extern_if,
                              extern_if,
                              download_file,
-                             upload_file,
                              get_udisk)
 
 from cab.prts.prt_exceptions import PrtError
@@ -172,10 +172,7 @@ class Controler(object):
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
 
-        server = "{user}@{ip}".format("pi", "127.0.0.1")
-        dst = "{server}:{dst}".format(server, dst)
-
-        upload_file(src, dst)
+        upload_file(src)
 
         return sub_data
 
