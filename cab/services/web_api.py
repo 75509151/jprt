@@ -22,7 +22,7 @@ def _http_call(api, data, timeout=None, json_reply=True):
             log.info("response: %s" % reply)
             return reply
         else:
-            log.info("respon" % (res.url, d))
+            log.info("respon" % (res.text))
             return res.text
     except Exception as e:
         log.warning("%s %s" % (url, d))
