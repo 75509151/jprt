@@ -203,9 +203,11 @@ class Controler(object):
                 status = res["status"]
                 if status == 1:
                     register_id = res.get("machine_id")
-                    if register_id:
+                    if register_id != machine_id:
                         set_machine_id(register_id)
                         return
+                else:
+                    continue
 
             except Exception as e:
                 log.warning("register: %s" % str(e))

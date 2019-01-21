@@ -18,7 +18,7 @@ def _http_call(api, data, timeout=None, json_reply=True):
         res = requests.post(url, data=d)
         log.info("%s %s" % (res.url, d))
         if json_reply:
-            reply = res.json()
+            reply = json.loads(res.json())
             log.info("response: %s" % reply)
             return reply
         else:
@@ -32,12 +32,11 @@ def _http_call(api, data, timeout=None, json_reply=True):
 def upload_file(file, retry=3):
     api = "/Api/uploadfile"
     url = "%s%s" % (WEB_SERVER, api)
-    data = {"machine_id": get_machine_id(),
-            "file": file}
-    files = {"file": open(file, "r")}
+    data = {"machine_id": get_machine_id()}
+    files = {"file": open(file, "rb")}
     for i in range(retry):
         res = requests.post(url, data, files=files)
-        res = res.json()
+        res = json.loads(res.json())
         log.info("response: %s" % res)
         if res["status"] == 1:
             return True
