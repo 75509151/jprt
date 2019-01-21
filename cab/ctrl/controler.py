@@ -202,13 +202,14 @@ class Controler(object):
                 log.info("register: %s" % res)
                 status = res["status"]
                 if status == 1:
-                    data = res["data"]
                     register_id = res.get("machine_id", "")
-                    if register_id != machine_id:
-                        set_machine_id(register_id)
+                    set_machine_id(register_id)
+                    return
+                else:
+                    register_id = res.get("machine_id")
+                    if register_id == machine_id:
                         return
-                    else:
-                        return
+
             except Exception as e:
                 log.warning("register: %s" % str(e))
             time.sleep(5)

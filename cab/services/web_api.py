@@ -32,11 +32,11 @@ def _http_call(api, data, timeout=None, json_reply=True):
 def upload_file(file, retry=3):
     api = "/Api/uploadfile"
     url = "%s%s" % (WEB_SERVER, api)
-    data = {"machine_id": 15,
+    data = {"machine_id": get_machine_id(),
             "file": file}
-    files = {"file": open(file, "rb")}
+    files = {"file": open(file, "r")}
     for i in range(retry):
-        res = requests.post(url, json.dumps(data), files=files)
+        res = requests.post(url, data, files=files)
         res = res.json()
         log.info("response: %s" % res)
         if res["status"] == 1:
