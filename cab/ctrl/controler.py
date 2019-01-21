@@ -202,24 +202,22 @@ class Controler(object):
         machine_type = get_machine_type()
         mac = get_hw_addr()
 
-        params = {"machine_id": machine_id,
+        params = {"id": machine_id,
                   "machine_type": machine_type,
                   "mac": mac}
         while True:
             try:
                 res = self.cs.call("register", params)
                 log.info("register: %s" % res)
-                code = res["code"]
-                if code == 0:
+                status = res["status"]
+                if status == 1:
                     data = res["data"]
-                    status = data["status"]
-                    register_id = data.get("machine_id", "")
-                    if status == 0:
-                        if register_id != machine_id:
-                            set_machine_id(register_id)
-                            return
-                        else:
-                            return
+                    register_id = res.get("machine_id", "")
+                    if register_id != machine_id:
+                        set_machine_id(register_id)
+                        return
+                    else:
+                        return
             except Exception as e:
                 log.warning("register: %s" % str(e))
             time.sleep(5)
