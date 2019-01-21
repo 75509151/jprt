@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import pudb
 
 from prnt import cups
@@ -16,6 +17,7 @@ log = init_log("prt_manager")
 
 class PrtManager(object):
     def __init__(self):
+        self.lock = threading.Lock()
         self.printer = HpPrinter()
 
     def discovery_uris(self, bus=None):
@@ -79,20 +81,18 @@ class PrtManager(object):
 
        	-o sides=two-sided-short-edge
         """
-        all_jobs = cups.getAllJobs() 
-        log.info("all jobs: %s" % len(all_jobs))
+        with self.lock:
+            all_jobs = cups.getAllJobs() 
+            log.info("old jobs len: %s" % len(all_jobs))
 
-        options = "-#{num} -o sides={sides} ".format(num=num, sides=sides)
+            options = "-#{num} -o sides={sides} ".format(num=num, sides=sides)
 
-        self.printer.print_file(document, options, remove=True)
-        all_jobs = cups.getAllJobs() 
-        if all_jobs:
-            log.info("now all jobs: %s, new job-id: %s" % (len(all_jobs), all_jobs[-1].job_id))
-        else:
-            log.info("now all jobs: %s " % (len(all_jobs)))
+            self.printer.print_file(document, options, remove=True)
+            all_jobs = cups.getAllJobs() 
+        
+            log.info("now all jobs len: %s, new job-id: %s" % (len(all_jobs), all_jobs[-1].job_id))
+            return all_jobs[-1] 
 
-    def report_print_result(self):
-        pass
 
     def open(self):
         if self.printer.dev:

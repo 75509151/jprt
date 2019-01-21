@@ -73,6 +73,9 @@ def report_printer_status(status):
               "params": status}
     return _http_call(api, params)
 
+def report_job_status(status):
+    print(status)
+    return 
 
 if __name__ == "__main__":
     embed()

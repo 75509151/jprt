@@ -1,5 +1,6 @@
 import sys
 import json
+import queue
 import time
 import threading
 import traceback
@@ -12,10 +13,12 @@ from cab.utils import constant as cst
 #from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.web_api import (register, report_printer_params, report_printer_status,
-                                  upload_file)
+                                  upload_file,
+                                  report_job_status)
 # from cab.services.server_api import CallServer, call_once
 from cab.services import code
 from cab.utils.utils import (get_extern_if,
+                             run_in_thread,
                              extern_if,
                              download_file,
                              get_udisk)
@@ -31,6 +34,7 @@ from cab.utils.machine_info import (get_machine_id,
 log = init_log("ctl")
 
 cab_port = get_config("ckc").getint("server", "cab_port")
+
 
 class ApiClient(ClientHandler):
     def __init__(self, sock, address, ctrl):
@@ -93,6 +97,7 @@ class Controler(object):
         super(Controler, self).__init__()
         self.log = log
         self._stop_event = threading.Event()
+        self.job_queue = queue.Queue()
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         self.prt_manager = PrtManager()
@@ -115,6 +120,14 @@ class Controler(object):
             log.warning(str(traceback.format_exc()))
         self.report(params=True, status=True)
 
+    def jobs_report(self):
+        while True:
+            job, callback_url = self.job_queue.get()
+            try:
+                report_job_status(job.state)
+            except Exception as e:
+                log.warning("report job: %s" % str(e))
+
     @extern_if
     def print_file(self, **kw):
         try:
@@ -132,7 +145,7 @@ class Controler(object):
         document = doucument_or_url if udisk else download_file(doucument_or_url)
 
         try:
-            self.prt_manager.print_file(document, num, colorful, sides)
+            job = self.prt_manager.print_file(document, num, colorful, sides)
         except PrtError as e:
             sub_data["code"] = e.code
             sub_data["msg"] = e.msg
@@ -152,10 +165,10 @@ class Controler(object):
         try:
             _, status = self.prt_manager.query()
             st = {"status-code": status["status-code"],
-                    "status-desc": status["status-desc"],
-                    "device-uri": status["device-uri"],
-                    "device-state": status["device-state"],
-                    "error-state": status["error-state"]}
+                  "status-desc": status["status-desc"],
+                  "device-uri": status["device-uri"],
+                  "device-state": status["device-state"],
+                  "error-state": status["error-state"]}
             sub_data["msg"] = st
         except PrtError as e:
             sub_data["code"] = e.code
@@ -213,20 +226,19 @@ class Controler(object):
                 log.warning("register: %s" % str(e))
             time.sleep(5)
 
-
     def report(self, params=False, status=True, force=False):
         params, status = self.prt_manager.query()
         if params:
-            pa = {"two-side":True,
-                    "colorful": False}
+            pa = {"two-side": True,
+                  "colorful": False}
             log.info("params: %s" % pa)
             report_printer_params(pa)
         if status:
             st = {"status-code": status["status-code"],
-                    "status-desc": status["status-desc"],
-                    "device-uri": status["device-uri"],
-                    "device-state": status["device-state"],
-                    "error-state": status["error-state"]}
+                  "status-desc": status["status-desc"],
+                  "device-uri": status["device-uri"],
+                  "device-state": status["device-state"],
+                  "error-state": status["error-state"]}
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
                 self.prt_st = st["status-code"]
