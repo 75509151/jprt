@@ -11,7 +11,8 @@ from cab.utils.console import embed
 from cab.utils import constant as cst
 #from cab.db.db_pool import DB_POOL as DBP
 from cab.ctrl.prt_manager import PrtManager
-from cab.services.server_api import CallServer, call_once
+from cab.services.web_api import register, report_printer_params, report_printer_status
+# from cab.services.server_api import CallServer, call_once
 from cab.services import code
 from cab.utils.utils import (get_extern_if,
                              extern_if,
@@ -96,7 +97,6 @@ class Controler(object):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         self.prt_manager = PrtManager()
         self.prt_st = None
-        self.cs = CallServer()
 
     def exit_gracefully(self, signum, frame):
         self._stop_event.set()
@@ -198,16 +198,10 @@ class Controler(object):
         return sub_data
 
     def register(self):
-        machine_id = get_machine_id()
-        machine_type = get_machine_type()
-        mac = get_hw_addr()
-
-        params = {"id": machine_id,
-                  "machine_type": machine_type,
-                  "mac": mac}
         while True:
             try:
-                res = self.cs.call("register", params)
+                machine_id = get_machine_id()
+                res = register()
                 log.info("register: %s" % res)
                 status = res["status"]
                 if status == 1:
@@ -229,7 +223,7 @@ class Controler(object):
             pa = {"two-side":True,
                     "colorful": False}
             log.info("params: %s" % pa)
-            self.cs.call_async("report_printer_params", pa)
+            report_printer_params(pa)
         if status:
             st = {"status-code": status["status-code"],
                     "status-desc": status["status-desc"],
@@ -239,7 +233,7 @@ class Controler(object):
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
                 self.prt_st = st["status-code"]
-                self.cs.call_async("report_printer_status", st)
+                report_printer_params(st)
 
     def run(self, test=False):
         try:
