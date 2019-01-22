@@ -212,13 +212,13 @@ class Controler(object):
             try:
                 machine_id = get_machine_id()
                 res = register()
-                log.info("register: %s" % res)
+                log.info("id: %s, register: %s" % (machine_id, res))
                 status = res["status"]
                 if status == 1:
                     register_id = res.get("machine_id")
                     if register_id != machine_id:
                         set_machine_id(register_id)
-                        return
+                    return
                 else:
                     continue
 
