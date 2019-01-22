@@ -16,6 +16,7 @@ from cab.services.web_api import (register, report_printer_params, report_printe
                                   upload_file,
                                   report_job_status)
 # from cab.services.server_api import CallServer, call_once
+from cab.services.call_cab import CallCab
 from cab.services import code
 from cab.utils.utils import (get_extern_if,
                              run_in_thread,
@@ -96,6 +97,7 @@ class Controler(object):
     def __init__(self):
         super(Controler, self).__init__()
         self.log = log
+        self.call_cab = CallCab("")
         self._stop_event = threading.Event()
         self.job_queue = queue.Queue()
         signal.signal(signal.SIGINT, self.exit_gracefully)
@@ -113,6 +115,7 @@ class Controler(object):
     def before_work(self):
         self.register()
 
+        self.call_cab.start()
         first_install = False
         try:
             if self.prt_manager.need_install():

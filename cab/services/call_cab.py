@@ -60,6 +60,7 @@ class CallCab(threading.Thread):
 
 
     def run(self):
+        self._heart_beat()
         while not self.stop.isSet():
             try:
                 self.on_recv()
@@ -156,7 +157,6 @@ if __name__ == "__main__":
 
     try:
         call_cab = CallCab("cab.ckservice.cab_api")
-        call_cab._heart_beat()
         call_cab.start()
     except Exception as ex:
         log.error("error in main: %s" % ex)
