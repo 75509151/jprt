@@ -1,8 +1,10 @@
 import threading
+
 import traceback
 import queue
 import time
 import json
+import socket
 
 from cab.services import code
 from cab.services.protocol import (Protocol, Request,
@@ -56,14 +58,14 @@ class CallCab(threading.Thread):
         with self.lock:
             self.remote_cli.send(data)
 
+
     def run(self):
         while not self.stop.isSet():
             try:
                 self.on_recv()
             except CommunicateException as e:
-                print(str(e))
-                time.sleep(1)
                 log.warning("retry remote server....")
+                self.remote_cli.connect(timeout=None)
             except Exception as e:
                 log.warning("run: %s" % str(traceback.format_exc()))
 
@@ -119,25 +121,22 @@ class CallCab(threading.Thread):
 
             # get the result for the request
             sub_data = None
-            if func_name == "is_on_line":
-                pass
-            else:
-                try:
-                    self.cab_cli.send(json.dumps({"func": func_name,
-                                                  "params": params}))
-                    recv_data = self.cab_cli.recv(80960)
+            try:
+                self.cab_cli.send(json.dumps({"func": func_name,
+                                                "params": params}))
+                recv_data = self.cab_cli.recv(80960)
 
-                    recv_data_dic = json.loads(sub_data)
+                recv_data_dic = json.loads(sub_data)
 
-                    reply_code = recv_data_dic.get("code")
-                    sub_data = recv_data_dic.get("sub_data")
+                reply_code = recv_data_dic.get("code")
+                sub_data = recv_data_dic.get("sub_data")
 
-                except ConnectionRefusedError as e:
-                    reply_code = code.UNAVALIABLE_SERVICE
+            except ConnectionRefusedError as e:
+                reply_code = code.UNAVALIABLE_SERVICE
 
-                except Exception as ex:
-                    log.warning(str(ex))
-                    reply_code = code.FAILED
+            except Exception as ex:
+                log.warning(str(ex))
+                reply_code = code.FAILED
 
             # print "reqid, result: ", reqId, res
             log.info("out %s(%s)" % (func_name, params))

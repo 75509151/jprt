@@ -1,4 +1,5 @@
 import socket
+import time
 import os
 import traceback
 import select
@@ -16,45 +17,59 @@ class Client(object):
         self.lock = threading.Lock()
         self.serv_addr = serv_addr
         self.serv_port = serv_port
-        self.sock = None
-        self.connected = False
-        self.log = log if log else _log
-
-    def init_sock(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.connected = False
+        self.log = log if log else _log
+        try:
+            self.connect(timeout=1)
+        except Exception as e:
+            pass
+
+    def _connect(self):
         try:
             self.sock.connect((self.serv_addr, self.serv_port))
-            self.log.debug("connected ")
+            self.connected = True
+            self.log.info("connected ")
         except socket.error as e:
-            self.sock = None
+            self.connected = False
             self.log.warning("connect failed: %s" % str(e))
-            raise e
+
+
+    def connect(self, timeout=1):
+        with self.lock:
+            if timeout is None:
+                while self.connected is False:
+                    self._connect()
+                    time.sleep(2)
+            else:
+                start = time.time()
+                while self.connected is False and time.time() - start < timeout:
+                    self._connect()
+                    time.sleep(2)
+
 
     def send(self, data, retry=3):
         with self.lock:
-            err = None
-            for i in range(retry):
-                try:
-                    if not self.sock:
-                        self.init_sock()
-                    ret = self.sock.sendall(data)
-                    self.log.info("send: %s " % data)
-                    return ret
-                except socket.error as e:
-                    err = e
-                    self.sock = None
-                    self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
-                    continue
+            try:
+                ret = self.sock.sendall(data)
+                self.log.info("send: %s " % data)
+                return ret
+            except socket.error as e:
+                self.connected = False
+                self.log.warning("send failed: %s" % str(e))
+                raise e
 
-                except Exception as e:
-                    self.log.warning("send failed %s: %s, %s" % (i, data, str(e)))
-                    err = e
-                    break
-            raise err
 
     def recv(self, size):
-        return self.sock.recv(size)
+        try:
+            return self.sock.recv(size)
+        except socket.error as e:
+            self.connected = False
+            self.log.warning("recv failed: %s" % str(e))
+            raise e
+
+
 
     def readable(self, timeout=None):
         fd_in, fd_out, fd_err = select.select((self.sock,), (), (), timeout)
@@ -69,11 +84,7 @@ class Client(object):
         return None
 
     def close(self):
-        if self.sock:
-            try:
-                self.sock.close()
-            except Exception:
-                pass
+        self.sock.close()
 
 
 if __name__ == '__main__':

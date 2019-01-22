@@ -145,6 +145,7 @@ class HeartBeat(AgentBase):
     def __init__(self, machine_id, _type=MSG_TYPE_HEART):
         AgentBase.__init__(self)
         self._machine_id = machine_id
+        self._type = _type
 
 
 
