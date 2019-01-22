@@ -17,13 +17,9 @@ def _http_call(api, data, timeout=None, json_reply=True):
     try:
         res = requests.post(url, data=d)
         log.info("%s %s" % (res.url, d))
-        if json_reply:
-            reply = json.loads(res.json())
-            log.info("response: %s" % reply)
-            return reply
-        else:
-            log.info("respon" % (res.text))
-            return res.text
+        reply = json.loads(res.json())
+        log.info("response: %s" % reply)
+        return reply
     except Exception as e:
         log.warning("%s %s" % (url, d))
         raise e
@@ -75,7 +71,7 @@ def report_printer_status(status):
 
 def report_job_status(status):
     print(status)
-    return 
+    return
 
 if __name__ == "__main__":
     embed()
