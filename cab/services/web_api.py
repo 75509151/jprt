@@ -12,17 +12,30 @@ WEB_SERVER = get_config("ckc").get("server", "web_server")
 
 
 def _http_call(api, data, timeout=None, json_reply=True):
+    result = {"status": "error", "info": ""}
     url = "%s%s" % (WEB_SERVER, api)
     d = json.dumps(data)
     try:
         res = requests.post(url, data=d)
         log.info("%s %s" % (res.url, d))
-        reply = json.loads(res.json())
-        log.info("response: %s" % reply)
-        return reply
+        result = json.loads(res.json())
+        log.info("response: %s" % result)
+    except requests.exceptions.HTTPError as err:
+        log.info("Http Error: %s" % err)
+        result = {"status": "http error", "info": str(err)}
+    except requests.exceptions.ConnectionError as err:
+        log.info("Error Connecting:%s" % err)
+        result = {"status": "connect error", "info": str(err)}
+    except requests.exceptions.Timeout as err:
+        log.info("Timeout Error: %s" % err)
+        result = {"status": "timeout error", "info": str(err)}
+    except requests.exceptions.RequestException as err:
+        log.info("OOps: Something Else: %s" % err)
+        result = {"status": "request error", "info": str(err)}
     except Exception as e:
         log.warning("%s %s" % (url, d))
-        raise e
+        result["info"] = str(e)
+    return result
 
 
 def upload_file(file, retry=3):
@@ -69,9 +82,11 @@ def report_printer_status(status):
               "params": status}
     return _http_call(api, params)
 
+
 def report_job_status(status):
     print(status)
     return
+
 
 if __name__ == "__main__":
     embed()

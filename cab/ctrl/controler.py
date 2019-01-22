@@ -113,12 +113,25 @@ class Controler(object):
     def before_work(self):
         self.register()
 
+        first_install = False
         try:
             if self.prt_manager.need_install():
+                first_install = True
                 self.prt_manager.install_printer()
         except Exception as e:
             log.warning(str(traceback.format_exc()))
-        self.report(params=True, status=True)
+
+        if first_install:
+            while True:
+                params_reported, _ = self.report(params=True)
+                if params_reported:
+                    log.info("report params Success")
+                    return
+                time.sleep(5)
+        else:
+            self.report(params=True)
+
+
 
     def jobs_report(self):
         while True:
@@ -226,14 +239,21 @@ class Controler(object):
                 log.warning("register: %s" % str(e))
             time.sleep(5)
 
-    def report(self, params=False, status=True, force=False):
+    def report(self, params=False, status=True, force=False, retry=3):
         params, status = self.prt_manager.query()
+        params_reported = False
+        status_reported = False
         if params:
             pa = {"two-side": True,
                   "colorful": False}
             log.info("params: %s" % pa)
-            report_printer_params(pa)
-        if status:
+            for i in range(retry):
+                res = report_printer_params(pa)
+                if res["status"] == 1:
+                    params_reported = True
+                    break
+
+        elif status:
             st = {"status-code": status["status-code"],
                   "status-desc": status["status-desc"],
                   "device-uri": status["device-uri"],
@@ -241,8 +261,14 @@ class Controler(object):
                   "error-state": status["error-state"]}
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
-                self.prt_st = st["status-code"]
-                report_printer_params(st)
+                for i in range(retry):
+                    res = report_printer_params(st)
+                    if res["status"] == 1:
+                        self.prt_st = st["status-code"]
+                        status_reported = True
+                        break
+
+        return params_reported, status_reported
 
     def run(self, test=False):
         try:
