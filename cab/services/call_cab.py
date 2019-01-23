@@ -63,9 +63,10 @@ class CallCab(threading.Thread):
         self._heart_beat()
         while not self.stop.isSet():
             try:
+                log.info("recv begin....")
                 self.on_recv()
             except CommunicateException as e:
-                log.warning("retry remote server....")
+                log.warning("retry remote server....: %s" % str(traceback.format_exc()))
                 self.remote_cli.connect(timeout=None)
             except Exception as e:
                 log.warning("run: %s" % str(traceback.format_exc()))
@@ -74,7 +75,7 @@ class CallCab(threading.Thread):
         """ recieve all. """
         try:
             s = size
-            buf = ""
+            buf = b""
             while True:
                 b = self.remote_cli.recv(s)
                 buf = buf + b

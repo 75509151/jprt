@@ -34,7 +34,7 @@ class Client(object):
             self.log.info("connected ")
         except socket.error as e:
             self.connected = False
-            self.log.warning("connect failed: %s" % str(e))
+            self.log.warning("serv_addr: %s, connect failed: %s" % (self.ser_addr,str(e)))
 
 
     def connect(self, timeout=1):
@@ -64,7 +64,9 @@ class Client(object):
 
     def recv(self, size):
         try:
-            return self.sock.recv(size)
+            data = self.sock.recv(size)
+            self.log.info("recv: %s " % data)
+            return data
         except socket.error as e:
             self.connected = False
             self.log.warning("recv failed: %s" % str(e))
