@@ -17,8 +17,7 @@ class Client(object):
         self.lock = threading.Lock()
         self.serv_addr = serv_addr
         self.serv_port = serv_port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock = None
         self.connected = False
         self.log = log if log else _log
         try:
@@ -28,6 +27,8 @@ class Client(object):
 
     def _connect(self):
         try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.connect((self.serv_addr, self.serv_port))
             self.connected = True
             self.log.info("connected ")

@@ -136,12 +136,12 @@ class Controler(object):
 
     def jobs_report(self):
         while True:
-            job, callback_url = self.job_queue.get()
+            job, trans_id = self.job_queue.get()
             try:
-                pass
-                # print_notify(job.state)
+                print_notify(trans_id, code="SUCCESS")
             except Exception as e:
                 log.warning("report job: %s" % str(e))
+
 
     @extern_if
     def print_file(self, **kw):
@@ -163,10 +163,12 @@ class Controler(object):
             document = doucument_or_url if udisk else download_file(doucument_or_url)
 
             job = self.prt_manager.print_file(document, num, colorful, sides)
+            self.job_queue.put((job, trans_id))
 
         except PrtError as e:
             sub_data["code"] = e.code
             sub_data["msg"] = e.msg
+
 
         return sub_data
 
