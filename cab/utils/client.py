@@ -34,7 +34,7 @@ class Client(object):
             self.log.info("connected ")
         except socket.error as e:
             self.connected = False
-            self.log.warning("serv_addr: %s, connect failed: %s" % (self.ser_addr,str(e)))
+            self.log.warning("serv_addr: %s, connect failed: %s" % (self.serv_addr,str(e)))
 
 
     def connect(self, timeout=1):
