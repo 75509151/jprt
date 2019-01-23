@@ -78,7 +78,7 @@ class ApiClient(ClientHandler):
             err_no = code.INTERNAL_ERROR
 
         self.send(json.dumps({"code": err_no,
-                              "sub_data": sub_data}))
+                              "sub_data": sub_data}).enode())
 
 
 class ApiServer(Server):
