@@ -11,7 +11,7 @@ from cab.utils.c_log import init_log
 from cab.utils.console import embed
 from cab.utils import constant as cst
 from cab.db.db_pool import DB_POOL
-from cab.ctrl.prt_manager import PrtManager
+from cab.ctrl.prt_manager import PrtManager, wait_job_done
 from cab.services.web_api import (register, report_printer_params, report_printer_status,
                                   upload_file,
                                   print_notify)
@@ -134,13 +134,36 @@ class Controler(object):
         else:
             self.report(params=True)
 
+
+
+
+
+
+    @run_in_thread
     def jobs_report(self):
+        def _report(trans_id, code):
+            while True:
+                res = print_notify(trans_id, code=code)
+                if res["status"] in (0, 1):
+                    with DB_POOL as db:
+                        db.del_trans(trans_id)
+                    return
+        try:
+            with DB_POOL as db:
+                trans_list = db.get_trans()
+                for trans in trans_list:
+                    _report(trans["trans_id"], "FAILED")
+        except Exception as e:
+            log.warning("clear old trans: %s" % str(e))
+
         while True:
-            job, trans_id = self.job_queue.get()
             try:
-                print_notify(trans_id, code="SUCCESS")
+                job, trans_id = self.job_queue.get()
+                job = wait_job_done(job)
+                code = "SUCCESS" if job else "FAILED"
+                _report(trans_id, code)
             except Exception as e:
-                log.warning("report job: %s" % str(e))
+                log.warning("jobs report: %s" % str(e))
 
 
     @extern_if
@@ -168,7 +191,6 @@ class Controler(object):
         except PrtError as e:
             sub_data["code"] = e.code
             sub_data["msg"] = e.msg
-
 
         return sub_data
 

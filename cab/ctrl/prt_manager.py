@@ -1,4 +1,5 @@
 import json
+import time
 import os
 import threading
 import pudb
@@ -14,6 +15,30 @@ from cab.prts import office
 
 log = init_log("prt_manager")
 
+
+def wait_job_done(job, timeout=60 * 5):
+    start = time.time()
+    while time.time() - start < timeout:
+        jobs = cups.getJobs()
+        if job.job_id not in [job.job_id for job in jobs]:
+            completed_jobs = cups.getJobs(completed=1)
+            for completed_job in completed_jobs[::-1]:
+                if completed_job.job_id == job.job_id:
+                    try:
+                        err_msg = cups.getPrintJobErrorLog(job.job_id)
+                        log.info("job_id: %s, msg: %s" % (completed_job.job_id, err_msg))
+                    except Exception as e:
+                        log.warning("get_err_log:%s" % str(e))
+
+                    return completed_job
+            else:
+                log.info("can not find this job")
+                return None
+
+        else:
+            time.sleep(1)
+    log.info("find job timeout")
+    return None
 
 class PrtManager(object):
     def __init__(self):
