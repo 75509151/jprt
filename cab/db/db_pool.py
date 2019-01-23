@@ -1,5 +1,5 @@
 import queue
-from .dbm import get_db_instance
+from cab.db.dbm import get_db_instance
 
 __all__ = ["DB_POOL"]
 

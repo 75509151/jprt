@@ -105,7 +105,7 @@ class AgentCodec(AgentBase):
 
     def encode_heart(self, machine_id):
         try:
-            return json.dumps({"id": machine_id,
+            return json.dumps({"machine_id": machine_id,
                                }).encode()
         except Exception as ex:
             raise CodecException(str(ex))

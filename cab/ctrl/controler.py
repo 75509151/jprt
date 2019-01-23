@@ -10,11 +10,11 @@ from cab.utils.server import Server, run_server, ClientHandler
 from cab.utils.c_log import init_log
 from cab.utils.console import embed
 from cab.utils import constant as cst
-#from cab.db.db_pool import DB_POOL as DBP
+from cab.db.db_pool import DB_POOL
 from cab.ctrl.prt_manager import PrtManager
 from cab.services.web_api import (register, report_printer_params, report_printer_status,
                                   upload_file,
-                                  report_job_status)
+                                  print_notify)
 # from cab.services.server_api import CallServer, call_once
 from cab.services.call_cab import CallCab
 from cab.services import code
@@ -140,7 +140,8 @@ class Controler(object):
         while True:
             job, callback_url = self.job_queue.get()
             try:
-                report_job_status(job.state)
+                pass
+                # print_notify(job.state)
             except Exception as e:
                 log.warning("report job: %s" % str(e))
 
@@ -162,6 +163,7 @@ class Controler(object):
 
         try:
             job = self.prt_manager.print_file(document, num, colorful, sides)
+
         except PrtError as e:
             sub_data["code"] = e.code
             sub_data["msg"] = e.msg
