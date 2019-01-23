@@ -128,7 +128,7 @@ class CallCab(threading.Thread):
                                                 "params": params}).encode())
                 recv_data = self.cab_cli.recv(80960)
 
-                recv_data_dic = json.loads(sub_data)
+                recv_data_dic = json.loads(recv_data)
 
                 reply_code = recv_data_dic.get("code")
                 sub_data = recv_data_dic.get("sub_data")
