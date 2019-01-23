@@ -125,7 +125,7 @@ class CallCab(threading.Thread):
             sub_data = None
             try:
                 self.cab_cli.send(json.dumps({"func": func_name,
-                                                "params": params}))
+                                                "params": params}).encode())
                 recv_data = self.cab_cli.recv(80960)
 
                 recv_data_dic = json.loads(sub_data)
@@ -137,7 +137,7 @@ class CallCab(threading.Thread):
                 reply_code = code.UNAVALIABLE_SERVICE
 
             except Exception as ex:
-                log.warning(str(ex))
+                log.warning(str(traceback.format_exc()))
                 reply_code = code.FAILED
 
             # print "reqid, result: ", reqId, res
