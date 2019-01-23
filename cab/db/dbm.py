@@ -9,11 +9,12 @@ from cab.utils.utils import make_dirs
 __all__ = ["get_db_instance"]
 
 
-
 log = init_log("db")
+
 
 def get_db_instance():
     return DB()
+
 
 class DB(object):
 
@@ -23,7 +24,7 @@ class DB(object):
         self.sync_db_path = sync_db_path if sync_db_path else self.config.get("db", "sync_db")
         make_dirs(os.path.dirname(self.ckc_db_path))
         make_dirs(os.path.dirname(self.sync_db_path))
-        
+
         self._open_db()
 
     def __del__(self):
@@ -60,7 +61,7 @@ class DB(object):
             if sync:
                 pass
                 # self.add_to_sync(SYNC_SERVICE, SYNC_MODULE, "set_kv",
-                                 # {"machine_id": get_kiosk_id(), "table": table, "changes": changes, "change_time": now})
+                               # {"machine_id": get_kiosk_id(), "table": table, "changes": changes, "change_time": now})
             self.conn.commit()
         except Exception:
             log.error(traceback.format_exc())
@@ -102,11 +103,52 @@ class DB(object):
             if sync:
                 pass
                 # self.add_to_sync(SYNC_SERVICE, SYNC_MODULE, "add_kv",
-                                 # {"machine_id": get_kiosk_id(),
-                                  # "table": table,
-                                  # "add_list": add_list})
+                               # {"machine_id": get_kiosk_id(),
+                                # "table": table,
+                                # "add_list": add_list})
             self.conn.commit()
         except Exception:
             log.error(traceback.format_exc())
             self.conn.rollback()
             raise
+
+    def get_trans(self, trans_id=None, status=None):
+        data = []
+        conditions = ""
+        if trans_id:
+            conditions += " AND trans_id='%s'" % (trans_id)
+        if status:
+            conditions += " AND status='%s'" % (status)
+
+        try:
+            sql = "SELECT (trans_id, status) FROM transations WHERE 1 %s" % conditions
+            rows = self.cursor.execute(sql, (trans_id,)).fetchall()
+            for row in rows:
+                trans = {}
+                trans["trans_id"] = row[0]
+                trans["status"] = row[1]
+                data.append(trans)
+        except Exception:
+            log.error(traceback.format_exc())
+        return data
+
+    def add_trans(self, trans_id):
+        try:
+            sql = "INSERT INTO transations (trans_id, status) VALUES(? ?)"
+            self.cursor.execute(sql, (trans_id, 0))
+            self.conn.commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            self.conn.rollback()
+            raise
+
+    def del_trans(self, trans_id):
+        try:
+            sql = "DELETE FROM transations WHERE trans_id=?"
+            self.cursor.execute(sql, (trans_id, ))
+            self.conn.commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            self.conn.rollback()
+            raise
+

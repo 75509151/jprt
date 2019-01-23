@@ -81,16 +81,17 @@ class PrtManager(object):
         -o sides=two-sided-short-edge
         """
         with self.lock:
-            all_jobs = cups.getAllJobs()
-            log.info("old jobs len: %s" % len(all_jobs))
+            jobs = cups.getJobs(completed=0)
+            log.info("old jobs len: %s" % len(jobs))
 
             options = "-#{num} -o sides={sides} ".format(num=num, sides=sides)
 
             self.printer.print_file(document, options, remove=True)
-            all_jobs = cups.getAllJobs()
+            jobs = cups.getJobs(completed=0)
+            curr_job = jobs[-1] if jobs else cups.getJobs(completed=1)[-1]
 
-            log.info("now all jobs len: %s, new job-id: %s" % (len(all_jobs), all_jobs[-1].job_id))
-            return all_jobs[-1]
+            log.info("now all jobs len: %s, new job-id: %s" % (len(jobs), curr_job.job_id))
+            return curr_job
 
     def open(self):
         if self.printer.dev:

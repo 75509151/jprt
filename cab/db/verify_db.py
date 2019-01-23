@@ -217,37 +217,6 @@ class CkcDb():
         rev = schema_tools.fortify(sql)
         log.info(rev + " machine_info")
 
-        sql = """CREATE TABLE machine_sys_events
-(
-    id_ai INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    id TEXT,
-    machine_id TEXT,
-    machine_name TEXT DEFAULT '',
-    event_type TEXT,
-    action TEXT DEFAULT '',
-    description TEXT,
-    add_time TEXT,
-    add_time_int INTEGER
-);"""
-        rev = schema_tools.fortify(sql)
-        log.info(rev + " machine_sys_events")
-
-
-        sql = """CREATE TABLE ad_media
-(
-    id_ai INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    id TEXT,
-    publish_id TEXT,
-    ad_id TEXT,
-    media_type TEXT,
-    media_name TEXT,
-    media_md5 TEXT,
-    lang TEXT,
-    sequence INTEGER
-);"""
-        rev = schema_tools.fortify(sql)
-        log.info(rev + " ad_media")
-
         sql = '''CREATE TABLE flags (
         key           TEXT PRIMARY KEY,
         value         TEXT
@@ -256,7 +225,6 @@ class CkcDb():
 
         rev = schema_tools.fortify(sql)
         log.info(rev + " flags")
-
 
         sql = """CREATE TABLE custom_content
 (
@@ -278,6 +246,15 @@ class CkcDb():
 );"""
         rev = schema_tools.fortify(sql)
         log.info(rev + " custom_content")
+
+        sql = """CREATE TABLE transations
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            trans_id  TEXT INDEX,
+            status  INTEGER
+        );"""
+        rev = schema_tools.fortify(sql)
+        log.info(rev + " transations")
 
     def _load_info(self):
         self.cur.execute("SELECT key FROM machine_info;")
@@ -363,19 +340,6 @@ class SyncDb:
         rev = schema_tools.fortify(sql)
         log.info(rev + " db_sync")
 
-        sql = """CREATE TABLE kiosk_api
-(
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    func TEXT,
-    params TEXT,
-    sequence INTEGER DEFAULT 1,
-    required_version TEXT DEFAULT "0.1.0",
-    add_time TEXT,
-    sync_time TEXT,
-    state INTEGER DEFAULT 0
-);"""
-        rev = schema_tools.fortify(sql)
-        log.info(rev + " kiosk_api")
 
 def verify_db():
     config = get_config("ckc")
@@ -398,4 +362,3 @@ if __name__ == "__main__":
     verify_db()
 
     print("Done")
-

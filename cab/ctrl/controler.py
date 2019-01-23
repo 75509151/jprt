@@ -134,8 +134,6 @@ class Controler(object):
         else:
             self.report(params=True)
 
-
-
     def jobs_report(self):
         while True:
             job, callback_url = self.job_queue.get()
@@ -159,9 +157,11 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": "Printing"}
 
-        document = doucument_or_url if udisk else download_file(doucument_or_url)
-
+        with DB_POOL as db:
+            db.add_trans(trans_id)
         try:
+            document = doucument_or_url if udisk else download_file(doucument_or_url)
+
             job = self.prt_manager.print_file(document, num, colorful, sides)
 
         except PrtError as e:

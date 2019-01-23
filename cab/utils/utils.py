@@ -7,7 +7,7 @@ import fcntl
 
 import magic
 from cab.services import code
-from cab import PRJ_DIR 
+from cab import PRJ_DIR
 
 def file_lock(lock):
     def handle_func(func):
