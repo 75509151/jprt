@@ -41,14 +41,17 @@ class CallCab(threading.Thread):
         # self.remote_cli = Client("127.0.0.1", 1507)
         self.cab_cli = Client(cab_host, cab_port)
 
+
+    def _send_heardbeat(self):
+        r = HeartBeat(get_machine_id())
+        data = Protocol().heart_to_raw(r)
+        self.send_to_remote(data)
+
     @run_in_thread
     def _heart_beat(self):
-
         while True:
             try:
-                r = HeartBeat(get_machine_id())
-                data = Protocol().heart_to_raw(r)
-                self.send_to_remote(data)
+                self._send_heardbeat()
             except Exception as e:
                 log.warning("heatbeat: %s" % str(e))
                 time.sleep(1)
@@ -69,6 +72,10 @@ class CallCab(threading.Thread):
             except CommunicateException as e:
                 log.warning("retry remote server....: %s" % str(traceback.format_exc()))
                 self.remote_cli.connect(timeout=None)
+                try:
+                    self._send_heardbeat()
+                except Exception as e:
+                    log.warning("connect send heart: %s" % str(e))
             except Exception as e:
                 log.warning("run: %s" % str(traceback.format_exc()))
 

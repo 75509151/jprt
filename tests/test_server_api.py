@@ -54,35 +54,37 @@ class ApiClient(ClientHandler):
 
 
     def on_recv(self):
-        """ recieve request and return reply. """
-        protocol = Protocol()
-        head_size = protocol.get_head_size()
-        head = self.recvall(head_size)
-        if len(head) != head_size:
-            raise CommunicateException("Connection closed by peer")
+        self.recv(86000)
+        self.reply_cli()
+        # """ recieve request and return reply. """
+        # protocol = Protocol()
+        # head_size = protocol.get_head_size()
+        # head = self.recvall(head_size)
+        # if len(head) != head_size:
+            # raise CommunicateException("Connection closed by peer")
 
-        _type, size, codec = protocol.parse_head(head)
+        # _type, size, codec = protocol.parse_head(head)
 
-        if size > 0 and size < MAX_MESSAGE_LENGTH:
-            # print "request size:", size
-            body = self.recvall(size)  # raise CommunicateException
-            # print "request body", body
-            try:
-                body = codec.decode(body[:-4])
-            except Exception as ex:
-                e = "Decode Request Message Body Error: %s" % ex
-                log.error(e)
-                raise ProtocolException(e)
-        else:
-            raise CommunicateException("size error: " + str(size))
+        # if size > 0 and size < MAX_MESSAGE_LENGTH:
+            # # print "request size:", size
+            # body = self.recvall(size)  # raise CommunicateException
+            # # print "request body", body
+            # try:
+                # body = codec.decode(body[:-4])
+            # except Exception as ex:
+                # e = "Decode Request Message Body Error: %s" % ex
+                # log.error(e)
+                # raise ProtocolException(e)
+        # else:
+            # raise CommunicateException("size error: " + str(size))
 
-        if _type == MSG_TYPE_REQUEST:
-            # break up the request
-            req_id, func_name, params = body["id"], body["func"], body["params"]
+        # if _type == MSG_TYPE_REQUEST:
+            # # break up the request
+            # req_id, func_name, params = body["id"], body["func"], body["params"]
 
-            log.info("in %s(%s)" % (func_name, params))
-            self.reply_cli()
-            log.info("out %s(%s)" % (func_name, params))
+            # log.info("in %s(%s)" % (func_name, params))
+            # self.reply_cli()
+            # log.info("out %s(%s)" % (func_name, params))
 
 
 
