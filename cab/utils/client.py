@@ -66,6 +66,10 @@ class Client(object):
         try:
             data = self.sock.recv(size)
             self.log.info("recv: %s " % data)
+            if not data:
+                self.connected = False
+                raise socket.error("close by peer")
+
             return data
         except socket.error as e:
             self.connected = False

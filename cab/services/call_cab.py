@@ -38,6 +38,7 @@ class CallCab(threading.Thread):
         self.call_module_path = call_module_path
         self.stop = threading.Event()
         self.remote_cli = Client(r2c_server, r2c_port)
+        # self.remote_cli = Client("127.0.0.1", 1507)
         self.cab_cli = Client(cab_host, cab_port)
 
     @run_in_thread
