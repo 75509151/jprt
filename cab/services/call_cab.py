@@ -39,7 +39,6 @@ class CallCab(threading.Thread):
         self.stop = threading.Event()
         self.remote_cli = Client(r2c_server, r2c_port)
         # self.remote_cli = Client("127.0.0.1", 1507)
-        self.cab_cli = Client(cab_host, cab_port)
 
 
     def _send_heardbeat(self):
@@ -132,9 +131,10 @@ class CallCab(threading.Thread):
             # get the result for the request
             sub_data = None
             try:
-                self.cab_cli.send(json.dumps({"func": func_name,
+                cab_cli = Client(cab_host, cab_port)
+                cab_cli.send(json.dumps({"func": func_name,
                                                 "params": params}).encode())
-                recv_data = self.cab_cli.recv(80960)
+                recv_data = cab_cli.recv(80960)
 
                 recv_data_dic = json.loads(recv_data)
 
