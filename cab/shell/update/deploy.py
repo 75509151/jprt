@@ -8,10 +8,10 @@ import os
 import click
 import traceback
 
-from . import update_info as upi 
-from . import update_utils as upu 
-from . import migration 
-from . import update_exceptions as upex
+import update_info as upi 
+import update_utils as upu 
+import migration 
+import update_exceptions as upex
 
 
 class Deployer(object):
@@ -39,12 +39,12 @@ class Deployer(object):
         self.do_cmd("rm -rf %s" % self.backuppath)
         self.do_cmd("mkdir -p %s" % self.backuppath)
         self.do_cmd("cp -r %s %s" %
-                    (os.path.join(upu.get_machine_home(), "kiosk"), self.backuppath))
+                    (os.path.join(upu.get_machine_home(), "jprt"), self.backuppath))
 
     def cp_downloaded_to_project_path(self):
-        project_path = os.path.join(upu.get_machine_home(), "kiosk")
+        project_path = os.path.join(upu.get_machine_home(), "jprt")
         certain_project_path = os.path.join(
-            upi.UPDATE_FOLDER, self.downloaded_version, "kiosk")
+            upi.UPDATE_FOLDER, self.downloaded_version, "jprt")
         self.do_cmd("rm -rf %s" % project_path)
         self.do_cmd("cp -r %s %s" % (certain_project_path, project_path))
 
@@ -56,9 +56,9 @@ class Deployer(object):
 
     def roll_back(self):
         self.log.info("update failed, rolling back...")
-        self.do_cmd("rm -rf %s" % (os.path.join(upu.get_machine_home(), "kiosk")))
+        self.do_cmd("rm -rf %s" % (os.path.join(upu.get_machine_home(), "jprt")))
         self.do_cmd("cp -r %s %s" %
-                    (os.path.join(self.backuppath, "kiosk"), upu.get_machine_home()))
+                    (os.path.join(self.backuppath, "jprt"), upu.get_machine_home()))
 
     def _update(self):
         self.ckc_version = upu.get_machine_version()

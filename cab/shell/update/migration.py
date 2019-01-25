@@ -40,8 +40,9 @@ class Migration(object):
         log.info("verify db!")
 
         VERIFY_DB_PY = os.path.join(
-            upu.get_machine_home(), "jprt", "cab", "db", "verify_db.pyc")
-        os.system("%s %s" % (upi.PYTHON_PATH, VERIFY_DB_PY))
+            upu.get_machine_home(), "jprt", "cab", "db", "verify_db.py")
+        ret = os.system("%s %s" % (upi.PYTHON_PATH, VERIFY_DB_PY))
+        log.info("verify db ret: %s" % ret)
 
     def __del__(self):
         del self.version_list

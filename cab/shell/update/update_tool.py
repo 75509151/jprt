@@ -31,7 +31,7 @@ class UpateTool(object):
 
     def _update(self):
         delpoly_py = os.path.join(
-            upi.UPDATE_FOLDER, self.downloaded_version, "kiosk/src/shell/update/", "deploy.pyc")
+            upi.UPDATE_FOLDER, self.downloaded_version, "jprt/cab/shell/update/", "deploy.py")
         self._doCommand("%s %s" % (upi.PYTHON_PATH, delpoly_py))
 
     def run(self):
