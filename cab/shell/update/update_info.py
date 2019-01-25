@@ -3,6 +3,7 @@ import os
 
 import update_utils as upu
 
+
 PYTHON_PATH = "python3"
 
 UPDATE_lOG = upu.init_log()
@@ -17,12 +18,10 @@ BACKUP_FOLDER = os.path.join(upu.get_machine_home(), "backup")
 UPDATE_PWD_FILE = "/tmp/update_pwd"
 
 
-REAL_SERVER = {"addr": upu.get_machine_server(
-    "update"), "user": "jprt", "password": "jprt"}
-TEST_SERVER = {"addr": "192.168.2.101",
-               "user": "jprt", "password": "jprt"}
+REAL_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt"}
+TEST_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt"}
 
 REMOTE_UPDATE_BASE_DIR = "JPRT"
 #
-DOWNLOAD_INTERVAL_SEC = 2 * 60 * 60
+DOWNLOAD_INTERVAL_SEC = 1 * 60 * 60
 DOWNLOAD_LOCK_PATH = "/tmp/.download_lock"

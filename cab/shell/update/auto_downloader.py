@@ -9,8 +9,8 @@ import os
 import time
 import sys
 
-import update_utils as upu 
-import project_download 
+import update_utils as upu
+import project_download
 from update_exceptions import ConfigException
 from update_info import (DOWNLOAD_INTERVAL_SEC, UPDATE_lOG, UPDATE_PWD_FILE,
                          TEST_SERVER, REAL_SERVER, REMOTE_UPDATE_BASE_DIR, REMOTE_VERSION)
@@ -27,7 +27,7 @@ class AutoDownloader(object):
         super(AutoDownloader, self).__init__()
         self.log = UPDATE_lOG
         self.test = test
-        self.pwd_file = UPDATE_PWD_FILE
+        self.pwd_file = "/tmp/pwd_file"
         self.remote_version_file = REMOTE_VERSION
         self.initialize()
 
@@ -41,6 +41,7 @@ class AutoDownloader(object):
                 self.server = REAL_SERVER["addr"]
                 self.user = REAL_SERVER["user"]
                 self.pwd = REAL_SERVER["password"]
+            self.generate_pwd_file()
         except KeyError as ex:
             self.log.error("Configuration file Error: %s" % str(ex))
             raise ConfigException("Configuration file Error: Update server")
@@ -48,11 +49,13 @@ class AutoDownloader(object):
             self.log.error("Exception caught when _initialize: %s" % str(ex))
             raise
 
-    def rsync_file(self, src, dst):
-        password = self.pwd
-        port= 22
-        real_src = "{user}@{server}:/{base_dir}/{src}".format(user=self.user, server=self.server, base_dir=REMOTE_UPDATE_BASE_DIR, src=src)
-        upu.rsync(real_src, dst,port=port, password=password, log=self.log)
+    def rsync_file(self, src, dest):
+        cmd = "rsync -az --password-file={pwd_file} {user}@{server}::update/{base_dir}/{src} {dest} ".format(
+            pwd_file=self.pwd_file, user=self.user, server=self.server, base_dir=REMOTE_UPDATE_BASE_DIR, src=src,
+            dest=dest)
+
+        ret = call(cmd, shell=True)
+        self.log.info("do cmd: %s, ret: %s" % (cmd,ret))
 
     def get_remote_version_info(self):
         self.rsync_file("version", self.remote_version_file)
@@ -61,6 +64,9 @@ class AutoDownloader(object):
             info = json.load(f)
         return info
 
+    def generate_pwd_file(self):
+        os.system("echo %s > %s" % (self.pwd, self.pwd_file))
+        os.system("chmod 600 %s" % self.pwd_file)
 
     def get_need_download_version(self):
         allow_version_info = self.get_remote_version_info()

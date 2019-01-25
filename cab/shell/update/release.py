@@ -27,8 +27,7 @@ RELEASE_PWD_FILE = "/tmp/release_pwd"
 #
 ##############
 DEL_FILES = set([])
-OBFUSCATE_FILSE = set(["ckc_control.py", "multicast.py", "cka.py", "access_agent_work.py", "video.py", "startckc.py",
-                       "sync_k2s.py", "sync_s2k.py"])
+OBFUSCATE_FILSE = []
 # OBFUSCATE_FILSE = set([])
 DEL_FOLDER = set(["tests", "docs"])
 
@@ -120,6 +119,7 @@ def _check_project(project_path):
 
 
 def _complite_project(project_path):
+    return
     compileall.compile_dir(project_path, quiet=True)
     print ("complite end")
 
@@ -140,12 +140,12 @@ def _clean_project(project_path):
 
     def clean_svn():
         print ("clean .svn begin")
-        svn_info_path = os.path.join(project_path, ".svn")
+        svn_info_path = os.path.join(project_path, ".git")
         if os.path.exists(svn_info_path):
             shutil.rmtree(svn_info_path)
         print ("clean .svn end")
 
-    clean_py()
+    # clean_py()
 
     clean_svn()
 
@@ -192,18 +192,18 @@ def generate_pwd_file(pwd):
     return RELEASE_PWD_FILE
 
 
-def backup_kiosk_path():
-    kiosk_path = os.path.join(upu.get_machine_home(), "kiosk")
-    backup_path = os.path.join(upu.get_machine_home(), "kiosk_backup")
-    if kiosk_path:
-        upu.cp_folder(kiosk_path, backup_path)
+def backup_jprt_path():
+    jprt_path = os.path.join(upu.get_machine_home(), "jprt")
+    backup_path = os.path.join(upu.get_machine_home(), "jprt_backup")
+    if jprt_path:
+        upu.cp_folder(jprt_path, backup_path)
 
 
-def recover_kiosk_path():
-    kiosk_path = os.path.join(upu.get_machine_home(), "kiosk")
-    backup_path = os.path.join(upu.get_machine_home(), "kiosk_backup")
+def recover_jprt_path():
+    jprt_path = os.path.join(upu.get_machine_home(), "jprt")
+    backup_path = os.path.join(upu.get_machine_home(), "jprt_backup")
     if os.path.exists(backup_path):
-        upu.cp_folder(backup_path, kiosk_path)
+        upu.cp_folder(backup_path, jprt_path)
 
 
 @click.command("release")
@@ -216,9 +216,9 @@ def recover_kiosk_path():
 @click.option("--after_day", "-af", prompt=u"几天后可以升级", type=int, default=7, help=u"几天后可以升级")
 def generate_version_to_download(user, pwd, project_path, version, server, after_day):
     print ("*********** begin*************")
-    backup_kiosk_path()
+    backup_jprt_path()
     try:
-        release_path = os.path.join(upu.get_machine_home(), "kiosk")
+        release_path = os.path.join(upu.get_machine_home(), "jprt")
 
         print ("release path", release_path)
 
@@ -240,7 +240,7 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
             os.path.join(upu.get_machine_home(), "tmp_release"))
 
         version_floder = os.path.join(tmp_release_path, version)
-        project_dest_floder = os.path.join(version_floder, "kiosk")
+        project_dest_floder = os.path.join(version_floder, "jprt")
         creat_and_cp_version_folder(
             release_path, output_path=project_dest_floder)
 
@@ -254,7 +254,7 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
         print (str(traceback.format_exc()))
         raise e
     finally:
-        recover_kiosk_path()
+        recover_jprt_path()
 
     print ("*********** end*************")
 
