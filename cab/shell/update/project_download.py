@@ -27,15 +27,12 @@ class VersionDownload(object):
         self.log = UPDATE_lOG
         self.lock = upu.ProcessLock(DOWNLOAD_LOCK_PATH)
         self.update_main_path = os.path.join(UPDATE_FOLDER, "main")
-        self.update_kiosk_path = os.path.join(self.update_main_path, "kiosk")
+        self.update_jprt_path = os.path.join(self.update_main_path, "jprt")
         upu.check_and_creat_path(self.update_main_path)
         self.initialize()
 
-    def _remove_kownhosts(self):
-        os.system("rm ~/.ssh/known_hosts")
 
     def initialize(self):
-        self._remove_kownhosts()
         try:
             if self.test is True:
                 self.server = TEST_SERVER["addr"]
@@ -69,7 +66,7 @@ class VersionDownload(object):
 
 
     def _download_project(self):
-        self.rsync_file("kiosk", self.update_main_path)
+        self.rsync_file("jprt", self.update_main_path)
 
 
 
