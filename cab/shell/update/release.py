@@ -43,21 +43,21 @@ def generate_version_file(path, version, after_day=7):
     return version_info
 
 
-def _get_project_version(svn_path):
-    def get_svn_tag_version():
-        return_code, out, err = upu.do_cmd("svn info %s" % svn_path)
-        try:
-            lines = out.split('\n')
-            if len(lines) < 4:
-                raise Exception("illegally svn path")
-            if lines[3].find("tags") == -1:
-                raise Exception("it's not svn tags: %s" % svn_path)
-            version = lines[3].split('/')[-1]
-        except Exception as e:
-            raise e
-        return version
+# def _get_project_version(svn_path):
+#     def get_svn_tag_version():
+#         return_code, out, err = upu.do_cmd("svn info %s" % svn_path)
+#         try:
+#             lines = out.split('\n')
+#             if len(lines) < 4:
+#                 raise Exception("illegally svn path")
+#             if lines[3].find("tags") == -1:
+#                 raise Exception("it's not svn tags: %s" % svn_path)
+#             version = lines[3].split('/')[-1]
+#         except Exception as e:
+#             raise e
+#         return version
 
-    return get_svn_tag_version()
+#     return get_svn_tag_version()
 
 
 def dosome_folder(parent_path):
@@ -104,17 +104,17 @@ def dosome_files(need_deal_files):
 def _check_project(project_path):
     print ("check svn status")
 
-    return_code, out, err = upu.do_cmd("svn update")
-    if return_code != 0 or err:
-        raise Exception(err)
+    # return_code, out, err = upu.do_cmd("svn update")
+    # if return_code != 0 or err:
+    #     raise Exception(err)
 
-    return_code, out, err = upu.do_cmd("svn status")
+    return_code, out, err = upu.do_cmd("git status")
     print ("out", out)
     if return_code != 0 or err:
         raise Exception(err)
     if out:
         raise Exception("project not clean in svn: %s" % out)
-    print ("svn check end")
+    print ("git check end")
     return True
 
 
@@ -210,13 +210,13 @@ def recover_jprt_path():
 @click.option("--user", "-u", prompt=u"版本服务器用户", default="mm", help=u"版本服务器用户")
 @click.option("--pwd", "-p", prompt=u"版本服务器密码", default="123456", help=u"版本服务器密码")
 @click.option("--project_path", "-pp", prompt=u"tag所在路径", default=os.path.join(upu.get_machine_home(), "release"), help=u"tag所在路径")
-@click.option("--version", "-v", prompt=u"版本号(默认使用tag号)", default="", help=u"版本号")
+@click.option("--version", "-v", prompt=u"版本号(默认使用tag号)",  help=u"版本号")
 # @click.option("--svn_check", "-c", prompt=u"检测tag所在目录是否干净", type=click.Choice([True, False]), default=True)
 @click.option("--server", "-s", prompt=u"版本服务器地址", default="192.168.2.54", help=u"版本服务器地址")
 @click.option("--after_day", "-af", prompt=u"几天后可以升级", type=int, default=7, help=u"几天后可以升级")
 def generate_version_to_download(user, pwd, project_path, version, server, after_day):
     print ("*********** begin*************")
-    backup_jprt_path()
+    # backup_jprt_path()
     try:
         release_path = os.path.join(upu.get_machine_home(), "jprt")
 
@@ -230,11 +230,11 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
 
         _check_project(project_path)
 
-        if not version:
-            version = _get_project_version(project_path)
-            print ("version", version)
+        # if not version:
+            # version = _get_project_version(project_path)
+            # print ("version", version)
 
-        release_project(project_path, release_path)
+        # release_project(project_path, release_path)
 
         tmp_release_path = os.path.abspath(
             os.path.join(upu.get_machine_home(), "tmp_release"))
@@ -253,8 +253,8 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
     except Exception as e:
         print (str(traceback.format_exc()))
         raise e
-    finally:
-        recover_jprt_path()
+    # finally:
+    #     recover_jprt_path()
 
     print ("*********** end*************")
 

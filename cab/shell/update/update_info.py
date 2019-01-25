@@ -18,8 +18,8 @@ BACKUP_FOLDER = os.path.join(upu.get_machine_home(), "backup")
 UPDATE_PWD_FILE = "/tmp/update_pwd"
 
 
-REAL_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt"}
-TEST_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt"}
+REAL_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt-up"}
+TEST_SERVER = {"addr": "67.218.146.76", "user": "jprt", "password": "jprt-up"}
 
 REMOTE_UPDATE_BASE_DIR = "JPRT"
 #
