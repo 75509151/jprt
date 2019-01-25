@@ -26,8 +26,6 @@ class VersionDownload(object):
         self.pwd_file = UPDATE_PWD_FILE
         self.log = UPDATE_lOG
         self.lock = upu.ProcessLock(DOWNLOAD_LOCK_PATH)
-        self.update_kiosk_md5_file = os.path.join(
-            UPDATE_FOLDER, "main", "kiosk.json")
         self.update_main_path = os.path.join(UPDATE_FOLDER, "main")
         self.update_kiosk_path = os.path.join(self.update_main_path, "kiosk")
         upu.check_and_creat_path(self.update_main_path)
@@ -59,34 +57,20 @@ class VersionDownload(object):
         cmd = "rsync -az --delete --password-file={pwd_file} {user}@{server}::update/{base_path}/{version}/{src} {dest} ".format(
             pwd_file=self.pwd_file, user=self.user, server=self.server, base_path=REMOTE_UPDATE_BASE_DIR, version=self.version, src=src,
             dest=dest)
-
-        self.log.info("do cmd: %s" % cmd)
-        call(cmd, shell=True)
+        
+        ret = call(cmd, shell=True)
+        self.log.info("do cmd: %s, ret:%s" % (cmd, ret))
+        if ret != 0:
+            raise Exception("rsync failed")
 
     def generate_pwd_file(self):
         os.system("echo %s > %s" % (self.pwd, self.pwd_file))
         os.system("chmod 600 %s" % self.pwd_file)
 
-    def _download_md5_info(self):
-        try:
-            os.remove(self.update_kiosk_md5_file)
-        except Exception:
-            pass
-
-        self.rsync_file("kiosk.json", self.update_kiosk_md5_file)
 
     def _download_project(self):
         self.rsync_file("kiosk", self.update_main_path)
 
-    def check_md5_and_del_wrong_file(self):
-
-        if not os.path.exists(self.update_kiosk_md5_file):
-            self.log.info("md5 file miss")
-            return False
-
-        def get_json(file):
-            with open(file, "r") as f:
-                return json.load(f)
 
 
     def cp_project(self):
@@ -99,13 +83,12 @@ class VersionDownload(object):
             self.lock.acquire()
             for try_count in range(retry):
                 try:
-                    self._download_md5_info()
                     self._download_project()
-                    if self.check_md5_and_del_wrong_file():
-                        self.cp_project()
-                        upu.set_machine_downloaded_version(self.version)
-                        self.log.info("[download end]")
-                        return True
+     
+                    self.cp_project()
+                    upu.set_machine_downloaded_version(self.version)
+                    self.log.info("[download end]")
+                    return True
                 except Exception as e:
                     # TODO: if is network err, try again
                     import traceback

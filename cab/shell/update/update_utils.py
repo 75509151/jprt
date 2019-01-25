@@ -139,24 +139,6 @@ def get_recursive_file_list(path, only_file=True):
     return all_files
 
 
-def generate_md5_info(path, output_path=None, info_name="md5.json"):
-    if output_path and not os.path.isabs(output_path):
-        raise Exception("output_path is not absolute path")
-    files = get_recursive_file_list(path)
-    info_dict = {}
-    info_dict = {"files_count": len(files)}
-
-    for file in files:
-        file_md5 = md5(file)
-        relative_file_name = file.replace(path + "/", "")
-        info_dict[relative_file_name] = file_md5
-
-    if output_path is not None:
-        info_file = os.path.join(output_path, info_name)
-        with open(info_file, "w") as f:
-            json.dump(info_dict, f)
-
-    return info_dict
 
 
 def get_bool_input():
@@ -215,11 +197,11 @@ def set_machine_version(ver):
     """
     set kiosk version
     """
-    version_path = "/home/mm/.kioskconfig/latest_version"
+    version_path = "/home/mm/.machineconfig/latest_version"
     if os.path.exists(version_path):
         with open(version_path, 'w') as f:
             f.write(ver)
-        with open("/home/mm/.kioskconfig/upgrade_time", 'w') as ff:
+        with open("/home/mm/.machineconfig/upgrade_time", 'w') as ff:
             ff.write(get_cur_time())
 
 
@@ -290,4 +272,4 @@ def get_machine_version():
 
 
 if __name__ == '__main__':
-    generate_md5_info("/home/mm/abox_release", "/home/mm/")
+    pass

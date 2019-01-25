@@ -179,8 +179,11 @@ def rsync_file_to_remote(user, server, src, dest):
     #if dest: dest += "/"
     cmd = "rsync -az --delete --password-file=%s %s %s@%s::update/%s" % (
         RELEASE_PWD_FILE, src, user, server, dest)
-    print ("do cmd: %s" % cmd)
-    call(cmd, shell=True)
+    
+    ret = call(cmd, shell=True)
+    print ("do cmd: %s, ret: %s" % (cmd, ret))
+    if ret != 0:
+        raise Exception("rsync failed")
 
 
 def release_to_remote(user, server, src, dest):
