@@ -18,8 +18,8 @@ import json
 
 import urllib
 
-from . import update_info as upi 
-from . import update_utils as upu 
+import update_info as upi 
+import update_utils as upu 
 
 RELEASE_PWD_FILE = "/tmp/release_pwd"
 
@@ -29,7 +29,7 @@ RELEASE_PWD_FILE = "/tmp/release_pwd"
 DEL_FILES = set([])
 OBFUSCATE_FILSE = []
 # OBFUSCATE_FILSE = set([])
-DEL_FOLDER = set(["tests", "docs"])
+DEL_FOLDER = set(["tests", "docs", "var", "jprt.egg-info", ".git"])
 
 
 def generate_version_file(path, version, after_day=7):
@@ -102,6 +102,7 @@ def dosome_files(need_deal_files):
 
 
 def _check_project(project_path):
+    return
     print ("check svn status")
 
     # return_code, out, err = upu.do_cmd("svn update")
@@ -207,12 +208,12 @@ def recover_jprt_path():
 
 
 @click.command("release")
-@click.option("--user", "-u", prompt=u"版本服务器用户", default="mm", help=u"版本服务器用户")
-@click.option("--pwd", "-p", prompt=u"版本服务器密码", default="123456", help=u"版本服务器密码")
-@click.option("--project_path", "-pp", prompt=u"tag所在路径", default=os.path.join(upu.get_machine_home(), "release"), help=u"tag所在路径")
-@click.option("--version", "-v", prompt=u"版本号(默认使用tag号)",  help=u"版本号")
+@click.option("--user", "-u", prompt=u"版本服务器用户", default="jprt", help=u"版本服务器用户")
+@click.option("--pwd", "-p", prompt=u"版本服务器密码", help=u"版本服务器密码")
+@click.option("--project_path", "-pp", prompt=u"项目路径", default=os.path.join(upu.get_machine_home(), "release"), help=u"项目版本路径")
+@click.option("--version", "-v", prompt=u"版本号",  help=u"版本号")
 # @click.option("--svn_check", "-c", prompt=u"检测tag所在目录是否干净", type=click.Choice([True, False]), default=True)
-@click.option("--server", "-s", prompt=u"版本服务器地址", default="192.168.2.54", help=u"版本服务器地址")
+@click.option("--server", "-s", prompt=u"版本服务器地址", default="", help=u"版本服务器地址")
 @click.option("--after_day", "-af", prompt=u"几天后可以升级", type=int, default=7, help=u"几天后可以升级")
 def generate_version_to_download(user, pwd, project_path, version, server, after_day):
     print ("*********** begin*************")
@@ -237,7 +238,7 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
         # release_project(project_path, release_path)
 
         tmp_release_path = os.path.abspath(
-            os.path.join(upu.get_machine_home(), "tmp_release"))
+            os.path.join("/tmp", "tmp_release"))
 
         version_floder = os.path.join(tmp_release_path, version)
         project_dest_floder = os.path.join(version_floder, "jprt")
