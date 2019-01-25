@@ -245,6 +245,7 @@ def generate_version_to_download(user, pwd, project_path, version, server, after
         creat_and_cp_version_folder(
             release_path, output_path=project_dest_floder)
 
+        dosome_folder(parent_path=project_dest_floder)
         generate_pwd_file(pwd)
         release_to_remote(user, server, version_floder, upi.REMOTE_UPDATE_BASE_DIR)
 
