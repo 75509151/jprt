@@ -130,7 +130,19 @@ class Controler(object):
         with DB_POOL as db:
             db.add_trans(trans_id)
         try:
-            document = doucument_or_url if udisk else download_file(doucument_or_url)
+            if udisk:
+                udisk_paths = get_udisk_path(abs_path=True)
+                if not udisk_paths:
+                    raise code.FileUnEixstError()
+
+                udisk_path = udisk_paths[0]
+                udisk_file = os.path.join(udisk_path, doucument_or_url)
+                if not os.path.isfile(udisk_file):
+                    raise code.FileUnEixstError()
+
+            else:
+        
+                document = download_file(doucument_or_url)
 
             job = self.prt_manager.print_file(document, num, colorful, sides)
             self.job_queue.put((job, trans_id))
