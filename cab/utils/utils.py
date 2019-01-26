@@ -85,6 +85,7 @@ def get_udisk(sub_path="/", suffix=None, abs_path=False):
         return None
 
     udisk_path = udisk_paths[0]
+    sub_path = "/" if not sub_path else sub_path
     check_path = os.path.join(udisk_path, sub_path)
     return get_sub_files(check_path)
 
