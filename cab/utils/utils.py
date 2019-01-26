@@ -127,11 +127,13 @@ def get_files(path, suffix=None):
 
 def download_file(url, dst="/tmp/", retry=3):
     new_name = str(uuid.uuid4())
-    cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, new_name)
+    new_file = os.path.join(dst, new_name)
+
+    cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, new_file)
     for i in range(retry):
         ret = subprocess.call(cmd)
         if ret == 0:
-            return os.path.join(dst, new_name)
+            return new_file
     raise code.DownloadError(url)
 
 

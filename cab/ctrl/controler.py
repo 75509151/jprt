@@ -137,7 +137,15 @@ class Controler(object):
 
                 udisk_path = udisk_paths[0]
                 udisk_file = os.path.join(udisk_path, doucument_or_url)
-                document = udisk_file 
+                dst = "/tmp/"
+                new_name = str(uuid.uuid4())
+                document = os.path.join(dst, new_name)
+                cmd = "cp '%s' '%s'" % (udisk_file, document)
+                ret = os.system(cmd)
+                if ret != 0:
+                    log.warning("cp failed: %s , %s" %(cmd, ret) )
+                
+
             else:
                 document = download_file(doucument_or_url)
 
