@@ -36,6 +36,7 @@ class ApiClient(ClientHandler):
         sub_data = {}
 
         data = self.recv(80960)
+        log.info("recv: %s" % data)
         try:
             func, params = self._get_func(data)
 
@@ -52,7 +53,7 @@ class ApiClient(ClientHandler):
             err_no = code.INTERNAL_ERROR
 
         self.send(json.dumps({"code": err_no,
-                              "sub_data": sub_data}).enode())
+                              "sub_data": sub_data}).encode())
 
 
 class ApiServer(Server):

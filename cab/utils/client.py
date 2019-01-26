@@ -103,11 +103,12 @@ class Client(object):
 if __name__ == '__main__':
 
     import json
-    c = Client("127.0.0.1", 1507)
+    c = Client("127.0.0.1", 1508)
     i = 0
     while True:
         # c.send(json.dumps({"t": 1}).encode(encoding='utf_8', errors='strict'))
-        c.send(json.dumps({"t": 1}).encode())
+        c.send(json.dumps({"func": "get_udisk_info",
+            "params":{"path":""}}).encode())
         print("recv: %s %s" % (i, c.recv(8096)))
         i += 1
         import time
