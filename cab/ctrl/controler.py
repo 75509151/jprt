@@ -23,7 +23,8 @@ from cab.utils.utils import (get_extern_if,
                              run_in_thread,
                              extern_if,
                              download_file,
-                             get_udisk)
+                             get_udisk,
+                             get_udisk_path)
 
 from cab.prts.prt_exceptions import PrtError
 from cab.utils.machine_info import (get_machine_id,
@@ -168,11 +169,22 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": "Success"}
         try:
-            src, dst = kw["src"], kw["dst"]
+            src, dst = kw["src"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
 
-        upload_file(src)
+        udisk_paths = get_udisk_path(abs_path=True)
+        if not udisk_paths:
+            raise code.FileUnEixstError()
+        
+        udisk_path = udisk_paths[0]
+
+        
+        udisk_file = os.path.join(udisk_path, src)
+        if not os.path.isfile(udisk_file):
+            raise code.FileUnEixstError()
+
+        upload_file(udisk_file)
 
         return sub_data
 
