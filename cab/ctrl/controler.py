@@ -127,8 +127,8 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": "Printing"}
 
-        with DB_POOL as db:
-            db.add_trans(trans_id)
+        # with DB_POOL as db:
+            # db.add_trans(trans_id)
         try:
             if udisk:
                 udisk_paths = get_udisk_path(abs_path=True)

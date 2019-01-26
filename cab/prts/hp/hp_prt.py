@@ -70,9 +70,9 @@ class HpPrinter():
             raise Exception("not file")
 
         if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
-            cmd = "unoconv --output '{document}' | /usr/bin/lpr {options} -P '{priner}'".format(options, document, self.name)
+            cmd = "unoconv --output '{document}' | /usr/bin/lpr {options} -P '{priner}'".format(options=options, document=document, printer=self.name)
         else:
-            cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options, self.name, document)
+            cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, doucument=document)
         if os.system(cmd) != 0:
             raise PrtPrintError("print file error")
 
