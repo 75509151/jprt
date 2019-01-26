@@ -1,7 +1,7 @@
 import os
 import traceback
-from . import update_utils as upu 
-from . import update_info as upi 
+import update_utils as upu 
+import update_info as upi 
 
 
 log = upi.UPDATE_lOG

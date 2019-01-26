@@ -2,9 +2,9 @@
 import os
 import sys
 
-from . import update_utils as upu 
+import update_utils as upu 
 
-from . import update_info as upi 
+import update_info as upi 
 
 # now 1.0.0 is trunk version
 VERSION_LIST = ['1.1.0', '1.1.1', '1.1.2', '1.1.3','1.1.4', '1.1.5','1.1.6']
