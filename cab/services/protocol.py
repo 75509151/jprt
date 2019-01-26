@@ -191,7 +191,7 @@ class Protocol(object):
 
     def reply_to_raw(self, reply):
         codec = AgentCodec()
-        body = codec.encode_reply(reply._rid, reply._code, reply._msg, reply._data)
+        body = codec.encode_reply(reply._rid, reply._machine_id, reply._code, reply._msg, reply._data)
         # print "body in reply_to_raw: %s %s" % (l, body)
         l = len(body) + 4
         head = struct.pack(self.head_fmt, STX, reply._type, l)
