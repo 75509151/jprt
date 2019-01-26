@@ -27,6 +27,12 @@ class Client(object):
 
     def _connect(self):
         try:
+            if self.sock:
+                self.close()
+        except Exception as e:
+            self.log.warning("close: %s" % str(e))
+
+        try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.connect((self.serv_addr, self.serv_port))
