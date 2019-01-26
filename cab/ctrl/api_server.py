@@ -49,11 +49,15 @@ class ApiClient(ClientHandler):
             err_no = e.code
 
         except Exception as e:
-            log.warning(str(e))
+            log.warning(str(traceback.format_exc()))
             err_no = code.INTERNAL_ERROR
 
-        self.send(json.dumps({"code": err_no,
-                              "sub_data": sub_data}).encode())
+        try:
+            self.send(json.dumps({"code": err_no,
+                                "sub_data": sub_data}).encode())
+        except Exception as e:
+            log.warning("replay err: %s" % str(e))
+
 
 
 class ApiServer(Server):
