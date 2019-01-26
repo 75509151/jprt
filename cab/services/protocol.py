@@ -111,9 +111,10 @@ class AgentCodec(AgentBase):
             raise CodecException(str(ex))
 
 
-    def encode_reply(self, _id, code, msg="", data=""):
+    def encode_reply(self, _id, machine_id,code, msg="", data=""):
         try:
             return json.dumps({"id": _id,
+                                "machine_id": machine_id,
                                 "code":code,
                                "msg": msg,
                                "data": data
@@ -152,9 +153,10 @@ class HeartBeat(AgentBase):
 class Reply(AgentBase):
     """ Reply """
 
-    def __init__(self, reqId, code, msg, data, _type=MSG_TYPE_REPLY):
+    def __init__(self, reqId, machine_id, code, msg, data, _type=MSG_TYPE_REPLY):
         AgentBase.__init__(self)
         self._rid = reqId
+        self._machine_id = machine_id
         self._code = code
         self._msg = msg
         self._data = data

@@ -153,7 +153,7 @@ class CallCab(threading.Thread):
 
             reply_msg = code.CODE2MSG.get(reply_code, "Unknown Error")
             sub_data = json.dumps({}) if not sub_data else json.dumps(sub_data)
-            reply = Reply(req_id, reply_code, reply_msg, sub_data)
+            reply = Reply(req_id,get_machine_id(), reply_code, reply_msg, sub_data)
 
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
