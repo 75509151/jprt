@@ -306,6 +306,7 @@ class Controler(object):
 
             self.init_server()
             run_server()
+            self.jobs_report()
 
             if test:
                 embed()
