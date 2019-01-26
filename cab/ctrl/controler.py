@@ -170,7 +170,7 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": "Success"}
         try:
-            src, dst = kw["src"]
+            src = kw["src"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
 
