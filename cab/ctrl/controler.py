@@ -137,12 +137,12 @@ class Controler(object):
 
                 udisk_path = udisk_paths[0]
                 udisk_file = os.path.join(udisk_path, doucument_or_url)
-                if not os.path.isfile(udisk_file):
-                    raise code.FileUnEixstError()
-
+                document = udisk_file 
             else:
-        
                 document = download_file(doucument_or_url)
+
+            if not os.path.isfile(document):
+                raise code.FileUnEixstError()
 
             job = self.prt_manager.print_file(document, num, colorful, sides)
             self.job_queue.put((job, trans_id))
