@@ -8,6 +8,9 @@ import fcntl
 import magic
 from cab.services import code
 from cab import PRJ_DIR
+from cab.utils.c_log import init_log
+from cab.utils.console import embed
+
 
 def file_lock(lock):
     def handle_func(func):
@@ -78,15 +81,17 @@ def get_udisk_path(abs_path=True):
         return udisk_paths
 
 
-def get_udisk(sub_path="/", suffix=None, abs_path=False):
+def get_udisk(sub_path="", suffix=None, abs_path=False):
     # TODO: only one udisk exist
-    udisk_paths = get_udisk_path(abs_path)
+    udisk_paths = get_udisk_path()
     if not udisk_paths or len(udisk_paths) > 1:
         return None
 
     udisk_path = udisk_paths[0]
-    sub_path = "/" if not sub_path else sub_path
+    
+    print(udisk_path)
     check_path = os.path.join(udisk_path, sub_path)
+    print(check_path)
     return get_sub_files(check_path)
 
 
@@ -146,3 +151,6 @@ def upload_file(src, dst, retry=3, port=22, rename=True):
 def make_dirs(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+if __name__ == "__main__":
+    embed()
