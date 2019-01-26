@@ -16,6 +16,7 @@ from cab.services.web_api import (register, report_printer_params, report_printe
                                   upload_file,
                                   print_notify)
 # from cab.services.server_api import CallServer, call_once
+from cab.ctrl.api_server import ApiServer, ApiClient
 from cab.services.call_cab import CallCab
 from cab.services import code
 from cab.utils.utils import (get_extern_if,
@@ -37,60 +38,6 @@ log = init_log("ctl")
 cab_port = get_config("ckc").getint("server", "cab_port")
 
 
-class ApiClient(ClientHandler):
-    def __init__(self, sock, address, ctrl):
-        super(ApiClient, self).__init__(sock, address)
-        self.ctrl = ctrl
-
-    def _get_func(self, data):
-        try:
-            data = json.loads(data)
-        except ValueError as e:
-            log.warning("could not decoded: %s" % str(data))
-            raise code.InternalErr("")
-
-        func = get_extern_if(self.ctrl, data["func"])
-        if not func:
-            raise code.NoSuchApiErr(data["func"])
-        return func, data["params"]
-
-
-    def handle_read(self):
-        err_no = 0
-        sub_data = {}
-
-        data = self.recv(80960)
-        try:
-            func, params = self._get_func(data)
-
-            sub_data = func(**params)
-        except code.InternalErr as e:
-            sub_data["sub_code"] = e.code
-            sub_data["msg"] = e.msg
-
-        except code.ExternalErr as e:
-            err_no = e.code
-
-        except Exception as e:
-            log.warning(str(e))
-            err_no = code.INTERNAL_ERROR
-
-        self.send(json.dumps({"code": err_no,
-                              "sub_data": sub_data}).enode())
-
-
-class ApiServer(Server):
-
-    def __init__(self, address, client, ctrl):
-        super(ApiServer, self).__init__(address, client)
-        self.ctrl = ctrl
-
-    def handle_accept(self):
-        client_info = self.accept()
-        if client_info is not None:
-            self.client(client_info[0], client_info[1], self.ctrl)
-
-
 class Controler(object):
     def __init__(self):
         super(Controler, self).__init__()
@@ -108,7 +55,7 @@ class Controler(object):
         log.info("catch signal: %s, %s" % (signum, frame))
 
     def init_server(self):
-        self.serv = ApiServer(("0.0.0.0", cab_port), ApiClient, self)
+        self.serv = ApiServer(("127.0.0.1", cab_port), ApiClient, self)
 
     def before_work(self):
         self.register()
