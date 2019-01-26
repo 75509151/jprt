@@ -250,7 +250,7 @@ class CkcDb():
         sql = """CREATE TABLE transations
         (
             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            trans_id  TEXT INDEX,
+            trans_id  TEXT,
             status  INTEGER
         );"""
         rev = schema_tools.fortify(sql)
