@@ -54,8 +54,6 @@ class ApiClient(ClientHandler):
             raise code.NoSuchApiErr(data["func"])
         return func, data["params"]
 
-    def _do_func(self, func, params):
-        return func(params)
 
     def handle_read(self):
         err_no = 0
@@ -65,7 +63,7 @@ class ApiClient(ClientHandler):
         try:
             func, params = self._get_func(data)
 
-            sub_data = self._do_func(func, params)
+            sub_data = func(**params)
         except code.InternalErr as e:
             sub_data["sub_code"] = e.code
             sub_data["msg"] = e.msg
