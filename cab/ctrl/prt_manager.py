@@ -20,13 +20,13 @@ def wait_job_done(job, timeout=60 * 5):
     start = time.time()
     while time.time() - start < timeout:
         jobs = cups.getJobs()
-        if job.job_id not in [job.job_id for job in jobs]:
+        if job.id not in [job.id for job in jobs]:
             completed_jobs = cups.getJobs(completed=1)
             for completed_job in completed_jobs[::-1]:
-                if completed_job.job_id == job.job_id:
+                if completed_job.id == job.id:
                     try:
-                        err_msg = cups.getPrintJobErrorLog(job.job_id)
-                        log.info("job_id: %s, msg: %s" % (completed_job.job_id, err_msg))
+                        err_msg = cups.getPrintJobErrorLog(job.id)
+                        log.info("job_id: %s, msg: %s" % (completed_job.id, err_msg))
                     except Exception as e:
                         log.warning("get_err_log:%s" % str(e))
 
@@ -115,7 +115,7 @@ class PrtManager(object):
             jobs = cups.getJobs(completed=0)
             curr_job = jobs[-1] if jobs else cups.getJobs(completed=1)[-1]
 
-            log.info("now all jobs len: %s, new job-id: %s" % (len(jobs), curr_job.job_id))
+            log.info("now all jobs len: %s, new job-id: %s" % (len(jobs), curr_job.id))
             return curr_job
 
     def open(self):
