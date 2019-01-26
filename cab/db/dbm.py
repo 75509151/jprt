@@ -121,7 +121,7 @@ class DB(object):
             conditions += " AND status='%s'" % (status)
 
         try:
-            sql = "SELECT (trans_id, status) FROM transations WHERE 1 %s" % conditions
+            sql = "SELECT (trans_id, status) FROM transations WHERE 1 %s ;" % conditions
             rows = self.cursor.execute(sql, (trans_id,)).fetchall()
             for row in rows:
                 trans = {}
@@ -134,7 +134,7 @@ class DB(object):
 
     def add_trans(self, trans_id):
         try:
-            sql = "INSERT INTO transations (trans_id, status) VALUES(? ?)"
+            sql = "INSERT INTO transations (trans_id, status) VALUES(? ?);"
             self.cursor.execute(sql, (trans_id, 0))
             self.conn.commit()
         except Exception:
@@ -144,7 +144,7 @@ class DB(object):
 
     def del_trans(self, trans_id):
         try:
-            sql = "DELETE FROM transations WHERE trans_id=?"
+            sql = "DELETE FROM transations WHERE trans_id=?;"
             self.cursor.execute(sql, (trans_id, ))
             self.conn.commit()
         except Exception:
