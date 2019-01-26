@@ -6,6 +6,7 @@ import time
 import threading
 import traceback
 import signal
+import uuid
 
 from cab.utils.server import Server, run_server, ClientHandler
 from cab.utils.c_log import init_log
