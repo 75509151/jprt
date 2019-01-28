@@ -45,7 +45,7 @@ class ClientHandler(asyncore.dispatcher):
         return (len(self.data_to_write)>0)
 
     def handle_write(self):
-        #TODO: unsafe  
+        #TODO: unsafe
         try:
             sent = self.send(self.data_to_write)
             self.data_to_write = self.data_to_write[sent:]
@@ -55,6 +55,8 @@ class ClientHandler(asyncore.dispatcher):
 
     def handle_read(self):
         data = self.recv(8096)
+        if not data:
+            return
         self.data_to_write+=data
         print("data_to_write:%s" % self.data_to_write)
 

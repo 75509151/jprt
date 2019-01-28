@@ -36,6 +36,8 @@ class ApiClient(ClientHandler):
         sub_data = {}
 
         data = self.recv(80960)
+        if not data:
+            return
         log.info("recv: %s" % data)
         try:
             func, params = self._get_func(data)
