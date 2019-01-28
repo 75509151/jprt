@@ -105,7 +105,6 @@ class DCDoor(object):
                 raise e
 
     def open_door(self, door=1, board=1, retry=3):
-        data = self.do_cmd(r)
         head_part = PACK_STX + chr(board) + chr(door) + CMD_OPEN_DOOR
         bcc = get_bcc(head_part)
         data = head_part + bcc
