@@ -34,6 +34,7 @@ from cab.utils.machine_info import (get_machine_id,
                                     get_config,
                                     get_hw_addr,
                                     set_machine_id)
+from cab.ext.dc_door import DCDoor, SDCDoor
 
 
 log = init_log("ctl")
@@ -45,11 +46,13 @@ class Controler(object):
     def __init__(self):
         super(Controler, self).__init__()
         self.log = log
+        self.test = get_config("ckc").get("main", "test") == "false"
         self.call_cab = CallCab("")
         self._stop_event = threading.Event()
         self.job_queue = queue.Queue()
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
+        self.door = DCDoor() if not self.test else SDCDoor()
         self.prt_manager = PrtManager()
         self.prt_st = None
 
@@ -82,11 +85,6 @@ class Controler(object):
         else:
             self.report(params=True)
 
-
-
-
-
-
     @run_in_thread
     def jobs_report(self):
         def _report(trans_id, code):
@@ -113,7 +111,6 @@ class Controler(object):
             except Exception as e:
                 log.warning("jobs report: %s" % str(e))
 
-
     @extern_if
     def print_file(self, **kw):
         try:
@@ -129,7 +126,7 @@ class Controler(object):
                     "msg": "Printing"}
 
         # with DB_POOL as db:
-            # db.add_trans(trans_id)
+        # db.add_trans(trans_id)
         try:
             if udisk:
                 udisk_paths = get_udisk_path(abs_path=True)
@@ -144,8 +141,7 @@ class Controler(object):
                 cmd = "cp '%s' '%s'" % (udisk_file, document)
                 ret = os.system(cmd)
                 if ret != 0:
-                    log.warning("cp failed: %s , %s" %(cmd, ret) )
-                
+                    log.warning("cp failed: %s , %s" % (cmd, ret))
 
             else:
                 document = download_file(doucument_or_url)
@@ -166,6 +162,14 @@ class Controler(object):
     def open_door(self, **kw):
         sub_data = {"sub_code": 0,
                     "msg": "Success"}
+        try:
+            if not self.door.open_door():
+                sub_data["sub_code"] = 1
+                sub_data["msg"] = "Failed"
+        except Exception as e:
+            sub_data["sub_code"] = 1
+            sub_data["msg"] = str(e)
+
         return sub_data
 
     @extern_if
@@ -198,10 +202,9 @@ class Controler(object):
         udisk_paths = get_udisk_path(abs_path=True)
         if not udisk_paths:
             raise code.FileUnEixstError()
-        
+
         udisk_path = udisk_paths[0]
 
-        
         udisk_file = os.path.join(udisk_path, src)
         if not os.path.isfile(udisk_file):
             raise code.FileUnEixstError()

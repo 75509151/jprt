@@ -43,9 +43,9 @@ def get_bcc(data):
 
 
 
-class SDCCabRobot(object):
+class SDCDoor(object):
 
-    def __init__(self, port="/dev/ttyS1"):
+    def __init__(self, port="/dev/dc_door"):
         self.port = port
 
     def open_door(self, door, board=0, retry=3):
@@ -57,7 +57,7 @@ class SDCCabRobot(object):
 
 class DCDoor(object):
 
-    def __init__(self, port="/dev/ttyS3", parent=None):
+    def __init__(self, port="/dev/dc_door", parent=None):
         self.port = port
         self.info = {"serial": False}
         self.boudrate = BOUDRATE
