@@ -61,6 +61,8 @@ target/
 #vim
 *.swp
 *.swo
+#vs code
+.vscode/
 
 tags
 
