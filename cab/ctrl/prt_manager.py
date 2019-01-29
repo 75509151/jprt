@@ -122,10 +122,7 @@ class PrtManager(object):
         if self.printer.dev:
             # TODO: try
             self.printer.open()
-        else:
-            pass
-            # if self.need_install():
-            # self.install_printer()
+        
 
 
 if __name__ == "__main__":

@@ -114,6 +114,11 @@ class Controler(object):
     @extern_if
     def print_file(self, **kw):
         try:
+            self.prt_manager.open()
+        except Exception as e:
+            log.info("prt open: %s" % str(e))
+            raise code.PrtLostError()
+        try:
             doucument_or_url, callback_url, trans_id = kw["file"], kw["callback_url"], kw["trans_id"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))

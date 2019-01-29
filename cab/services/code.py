@@ -11,6 +11,8 @@ DOWNLOAD_ERROR = 1000
 UNEXIST_ERROR = 1002
 UPLOAD_ERROR = 1003
 
+PRTLOST_ERROR = 2000
+
 CODE2MSG={
         SUCCESS: "Success",
         FAILED: "Failed",
@@ -57,3 +59,8 @@ class FileUnEixstError(InternalErr):
 class UploadError(InternalErr):
     code = UPLOAD_ERROR
     msg = "Upload failed"
+
+
+class PrtLostError(InternalErr):
+    code = PRTLOST_ERROR
+    msg = "Printer lost"
