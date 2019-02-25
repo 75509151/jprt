@@ -11,12 +11,19 @@ log = init_log("web_api")
 WEB_SERVER = get_config("ckc").get("server", "web_server")
 
 
-def _http_call(api, data, timeout=None, json_reply=True):
+def _http_call(api, data, files=None, jsonly=True):
     result = {"status": "error", "info": ""}
     url = "%s%s" % (WEB_SERVER, api)
-    d = json.dumps(data)
+    if jsonly:
+        d = json.dumps(data)
+    else:
+        d = data
     try:
-        res = requests.post(url, data=d)
+        if files is None:
+            res = requests.post(url, data=d)
+        else:
+            res = requests.post(url, data=d, files=files)
+
         log.info("%s %s" % (res.url, d))
         result = json.loads(res.json())
         log.info("response: %s" % result)
@@ -38,20 +45,13 @@ def _http_call(api, data, timeout=None, json_reply=True):
     return result
 
 
-def upload_file(file, retry=3):
+def upload_file(file):
     api = "/Api/uploadfile"
     url = "%s%s" % (WEB_SERVER, api)
+    log.info("upload: %s" % file)
     data = {"machine_id": get_machine_id()}
     files = {"file": open(file, "rb")}
-    for i in range(retry):
-        res = requests.post(url, data, files=files)
-        res = json.loads(res.json())
-        log.info("response: %s" % res)
-        if res["status"] == 1:
-            return True
-        else:
-            continue
-    return False
+    return _http_call(api, data, files, jsonly=False)
 
 
 def register():

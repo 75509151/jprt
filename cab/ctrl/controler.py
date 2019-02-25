@@ -214,9 +214,13 @@ class Controler(object):
         if not os.path.isfile(udisk_file):
             raise code.FileUnEixstError()
 
-        upload_file(udisk_file)
-
-        return sub_data
+        res = upload_file(udisk_file)
+        status = res["status"]
+        if status == 1:
+            return sub_data
+        else:
+            return {"sub_code": 3,
+                    "info": res["info"]}
 
     @extern_if
     def get_udisk_info(self, **kw):
