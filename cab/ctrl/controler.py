@@ -260,7 +260,7 @@ class Controler(object):
             time.sleep(5)
 
     def report(self, params=False, status=True, force=False, retry=3):
-        params, status = self.prt_manager.query()
+        now_params, now_status = self.prt_manager.query()
         params_reported = False
         status_reported = False
         if params:
@@ -274,11 +274,11 @@ class Controler(object):
                     break
 
         elif status:
-            st = {"status-code": status["status-code"],
-                  "status-desc": status["status-desc"],
-                  "device-uri": status["device-uri"],
-                  "device-state": status["device-state"],
-                  "error-state": status["error-state"]}
+            st = {"status-code": now_status["status-code"],
+                  "status-desc": now_status["status-desc"],
+                  "device-uri": now_status["device-uri"],
+                  "device-state": now_status["device-state"],
+                  "error-state": now_status["error-state"]}
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
                 for i in range(retry):
