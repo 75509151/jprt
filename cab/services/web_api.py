@@ -45,12 +45,15 @@ def _http_call(api, data, files=None, jsonly=True):
     return result
 
 
-def upload_file(file):
+def upload_file(file, dst=""):
     api = "/Api/uploadfile"
     url = "%s%s" % (WEB_SERVER, api)
     log.info("upload: %s" % file)
     data = {"machine_id": get_machine_id()}
-    files = {"file": open(file, "rb")}
+    if not dst:
+        files = {"file": open(file, "rb")}
+    else:
+        files = {"file": (dst, open(file, "rb"))}
     return _http_call(api, data, files, jsonly=False)
 
 
