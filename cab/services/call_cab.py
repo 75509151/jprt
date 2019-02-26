@@ -124,13 +124,15 @@ class CallCab(threading.Thread):
         if _type == MSG_TYPE_REQUEST:
             reply_code = code.SUCCESS
             # break up the request
-            req_id, func_name, params = body["id"], body["func"], body["params"]
-
-            log.info("in %s(%s)" % (func_name, params))
-
-            # get the result for the request
             sub_data = None
+            reply_msg = None
             try:
+                req_id, func_name, params = body["id"], body["func"], body["params"]
+
+                log.info("in %s(%s)" % (func_name, params))
+
+                # get the result for the request
+            
                 cab_cli = Client(cab_host, cab_port)
                 cab_cli.send(json.dumps({"func": func_name,
                                                 "params": params}).encode())
@@ -143,15 +145,18 @@ class CallCab(threading.Thread):
 
             except ConnectionRefusedError as e:
                 reply_code = code.UNAVALIABLE_SERVICE
+                
 
             except Exception as ex:
                 log.warning(str(traceback.format_exc()))
                 reply_code = code.FAILED
-
+                _msg = str(ex)
+            
+            reply_msg = reply_msg if reply_msg else code.CODE2MSG.get(reply_code, "Unknown Error")
+            
             # print "reqid, result: ", reqId, res
             log.info("out %s(%s)" % (func_name, params))
 
-            reply_msg = code.CODE2MSG.get(reply_code, "Unknown Error")
             sub_data = json.dumps({}) if not sub_data else json.dumps(sub_data)
             reply = Reply(req_id,get_machine_id(), reply_code, reply_msg, sub_data)
 
