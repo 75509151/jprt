@@ -214,7 +214,7 @@ class Controler(object):
         if not os.path.isfile(udisk_file):
             raise code.FileUnEixstError()
 
-        res = upload_file(udisk_file)
+        res = upload_file(udisk_file, src)
         status = res["status"]
         if status == 1:
             return sub_data

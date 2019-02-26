@@ -154,7 +154,6 @@ class CallCab(threading.Thread):
             
             reply_msg = reply_msg if reply_msg else code.CODE2MSG.get(reply_code, "Unknown Error")
             
-            # print "reqid, result: ", reqId, res
             log.info("out %s(%s)" % (func_name, params))
 
             sub_data = json.dumps({}) if not sub_data else json.dumps(sub_data)
