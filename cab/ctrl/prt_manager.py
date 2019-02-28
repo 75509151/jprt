@@ -20,7 +20,7 @@ def wait_job_done(job, timeout=60 * 5):
     start = time.time()
     while time.time() - start < timeout:
         jobs = cups.getJobs()
-        if job.id not in [job.id for job in jobs]:
+        if job.id not in [j.id for j in jobs]:
             completed_jobs = cups.getJobs(completed=1)
             for completed_job in completed_jobs[::-1]:
                 if completed_job.id == job.id:
@@ -37,7 +37,7 @@ def wait_job_done(job, timeout=60 * 5):
 
         else:
             time.sleep(1)
-    log.info("find job timeout")
+    log.info("find job timeout :%s" % job.id)
     return None
 
 class PrtManager(object):
@@ -122,7 +122,7 @@ class PrtManager(object):
         if self.printer.dev:
             # TODO: try
             self.printer.open()
-        
+
 
 
 if __name__ == "__main__":
