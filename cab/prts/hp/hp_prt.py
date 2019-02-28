@@ -76,6 +76,7 @@ class HpPrinter():
             cmd = "unoconv --output '{document}' | /usr/bin/lpr {options} -P '{priner}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
+        log.info("print cmd: %s" % cmd)
         if os.system(cmd) != 0:
             raise PrtPrintError("print file error")
 
