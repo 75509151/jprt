@@ -131,7 +131,7 @@ def download_file(url, dst="/tmp/", retry=3):
 
     cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, new_file)
     for i in range(retry):
-        ret = subprocess.call(cmd)
+        ret = subprocess.call(cmd, shell=True)
         if ret == 0:
             return new_file
     raise code.DownloadError(url)
