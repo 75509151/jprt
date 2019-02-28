@@ -11,6 +11,7 @@ from cab import PRJ_DIR
 from cab.utils.c_log import init_log
 from cab.utils.console import embed
 
+log = init_log("utils")
 
 def file_lock(lock):
     def handle_func(func):
@@ -127,6 +128,7 @@ def get_files(path, suffix=None):
 
 def download_file(url, dst, retry=3):
     cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, dst)
+    log.info(cmd)
     for i in range(retry):
         ret = subprocess.call(cmd, shell=True)
         if ret == 0:
