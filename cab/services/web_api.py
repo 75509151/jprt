@@ -88,7 +88,7 @@ def report_printer_status(status):
 
 
 def print_notify(trans_id, code, msg=""):
-    api = "/Api/report_printer_status"
+    api = "/Api/printnotify"
     params = {"trans_id": trans_id,
               "code": code,
               "msg": msg}
