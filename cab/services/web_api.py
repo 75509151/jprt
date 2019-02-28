@@ -50,7 +50,7 @@ def upload_file(file, dst=""):
     url = "%s%s" % (WEB_SERVER, api)
     log.info("upload: %s" % file)
     data = {"machine_id": get_machine_id(),
-            "path": file}
+            "path": dst}
     if not dst:
         files = {"file": open(file, "rb")}
     else:
