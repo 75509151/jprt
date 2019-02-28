@@ -65,6 +65,7 @@ class Controler(object):
 
     def before_work(self):
         self.register()
+        self.prt_manager.cancel_uncomplete_jobs()
 
         self.call_cab.start()
         first_install = False

@@ -72,6 +72,16 @@ class PrtManager(object):
         ret = os.system("lpadmin -x '%s'" % name)
         log.warning("delete printer: %s, ret: %s" % (name, ret))
 
+    def cancel_uncomplete_jobs(self):
+        try:
+            jobs = cups.getJobs(completed=0)
+            for job in jobs:
+                cups.cancelJob(job.id)
+
+        except Exception as e:
+            log.warning("cancel_uncomplete_jobs: %s" % str(e))
+
+
     def install_printer(self):
         try:
             HpPrinter.setup()
