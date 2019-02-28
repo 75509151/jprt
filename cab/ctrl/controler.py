@@ -197,12 +197,14 @@ class Controler(object):
 
     @extern_if
     def upload_file(self, **kw):
-        sub_data = {"sub_code": 0,
-                    "msg": "Success"}
         try:
             src = kw["src"]
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
+
+        sub_data = {"sub_code": 0,
+                    "msg": "Success",
+                    "path": src}
 
         udisk_paths = get_udisk_path(abs_path=True)
         if not udisk_paths:
