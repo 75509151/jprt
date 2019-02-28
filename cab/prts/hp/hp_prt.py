@@ -69,19 +69,20 @@ class HpPrinter():
         if not os.path.isfile(document):
             raise Exception("not file")
         suffix = os.path.splitext(document)[1]
-        ms_types = ("doc", "docx", "xlsx", "xls",
-                    "ppt", "pptx")
+        ms_types = (".doc", ".docx", ".xlsx", ".xls",
+                    ".ppt", ".pptx")
 
         if suffix in ms_types or get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
             cmd = "unoconv --output '{document}' | /usr/bin/lpr {options} -P '{priner}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
         log.info("print cmd: %s" % cmd)
-        if os.system(cmd) != 0:
-            raise PrtPrintError("print file error")
-
-        if remove:
-            os.system("rm %s" % document)
+        try:
+            if os.system(cmd) != 0:
+                raise PrtPrintError("print file error")
+        finally:
+            if remove:
+                os.system("rm %s" % document)
 
     @staticmethod
     def setup(connection_type="usb"):
