@@ -135,7 +135,7 @@ class Controler(object):
         # db.add_trans(trans_id)
         try:
             dst_dir = "/tmp/"
-            suffix = os.path.splitext(doucument_or_url)
+            suffix = os.path.splitext(doucument_or_url)[1]
 
             new_name = "%s%s" % (str(uuid.uuid4()),suffix)
             if udisk:
