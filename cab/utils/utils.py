@@ -88,7 +88,7 @@ def get_udisk(sub_path="", suffix=None, abs_path=False):
         return None
 
     udisk_path = udisk_paths[0]
-    
+
     print(udisk_path)
     check_path = os.path.join(udisk_path, sub_path)
     print(check_path)
@@ -125,17 +125,13 @@ def get_files(path, suffix=None):
     return files
 
 
-def download_file(url, dst="/tmp/", retry=3):
-    new_name = str(uuid.uuid4())
-    new_file = os.path.join(dst, new_name)
-
-    cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, new_file)
+def download_file(url, dst, retry=3):
+    cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, dst)
     for i in range(retry):
         ret = subprocess.call(cmd, shell=True)
         if ret == 0:
-            return new_file
+            return dst
     raise code.DownloadError(url)
-
 
 def upload_file(src, dst, retry=3, port=22, rename=True):
     if rename:

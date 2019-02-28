@@ -133,6 +133,10 @@ class Controler(object):
         # with DB_POOL as db:
         # db.add_trans(trans_id)
         try:
+            dst_dir = "/tmp/"
+            suffix = os.path.splitext(doucument_or_url)
+
+            new_name = "%s%s" % (str(uuid.uuid4()),suffix)
             if udisk:
                 udisk_paths = get_udisk_path(abs_path=True)
                 if not udisk_paths:
@@ -140,16 +144,15 @@ class Controler(object):
 
                 udisk_path = udisk_paths[0]
                 udisk_file = os.path.join(udisk_path, doucument_or_url)
-                dst = "/tmp/"
-                new_name = str(uuid.uuid4())
-                document = os.path.join(dst, new_name)
+                document = os.path.join(dst_dir, new_name)
                 cmd = "cp '%s' '%s'" % (udisk_file, document)
                 ret = os.system(cmd)
                 if ret != 0:
                     log.warning("cp failed: %s , %s" % (cmd, ret))
 
             else:
-                document = download_file(doucument_or_url)
+                new_file = os.path.join(dst_dir, new_name)
+                document = download_file(doucument_or_url, new_file)
 
             if not os.path.isfile(document):
                 raise code.FileUnEixstError()

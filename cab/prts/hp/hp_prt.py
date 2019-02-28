@@ -68,8 +68,11 @@ class HpPrinter():
         """黑白彩色，单双面，份数 """
         if not os.path.isfile(document):
             raise Exception("not file")
+        suffix = os.path.splitext(document)[1]
+        ms_types = ("doc", "docx", "xlsx", "xls",
+                    "ppt", "pptx")
 
-        if get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
+        if suffix in ms_types or get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
             cmd = "unoconv --output '{document}' | /usr/bin/lpr {options} -P '{priner}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
