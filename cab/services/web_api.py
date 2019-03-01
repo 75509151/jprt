@@ -52,9 +52,9 @@ def upload_file(file, dst=""):
     data = {"machine_id": get_machine_id(),
             "path": dst}
     # if not dst:
-    files = {"file": open(file, "rb")}
+    # files = {"file": open(file, "rb")}
     # else:
-        # files = {"file": (dst, open(file, "rb"))}
+    files = {"file": (dst, open(file, "rb"))}
     return _http_call(api, data, files, jsonly=False)
 
 
