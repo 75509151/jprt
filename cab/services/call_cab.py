@@ -40,7 +40,6 @@ class CallCab(threading.Thread):
         self.remote_cli = Client(r2c_server, r2c_port)
         # self.remote_cli = Client("127.0.0.1", 1507)
 
-
     def _send_heardbeat(self):
         r = HeartBeat(get_machine_id())
         data = Protocol().heart_to_raw(r)
@@ -60,7 +59,6 @@ class CallCab(threading.Thread):
     def send_to_remote(self, data):
         with self.lock:
             self.remote_cli.send(data)
-
 
     def run(self):
         self._heart_beat()
@@ -126,38 +124,39 @@ class CallCab(threading.Thread):
             # break up the request
             sub_data = None
             reply_msg = None
+            recv_data = None
             try:
                 req_id, func_name, params = body["id"], body["func"], body["params"]
 
                 log.info("in %s(%s)" % (func_name, params))
 
                 # get the result for the request
-            
+
                 cab_cli = Client(cab_host, cab_port)
                 cab_cli.send(json.dumps({"func": func_name,
-                                                "params": params}).encode())
+                                         "params": params}).encode())
                 recv_data = cab_cli.recv(80960)
 
                 recv_data_dic = json.loads(recv_data)
 
                 reply_code = recv_data_dic.get("code")
-                sub_data = recv_data_dic.get("sub_data")
+                sub_data = recv_data_dic.get("sub_data", None)
+                reply_msg = recv_data_dic.get("reply_msg", None)
 
             except ConnectionRefusedError as e:
                 reply_code = code.UNAVALIABLE_SERVICE
-                
 
             except Exception as ex:
                 log.warning(str(traceback.format_exc()))
                 reply_code = code.FAILED
                 _msg = str(ex)
-            
+
             reply_msg = reply_msg if reply_msg else code.CODE2MSG.get(reply_code, "Unknown Error")
-            
-            log.info("out %s(%s)" % (func_name, params))
+
+            log.info("raw out: %s" % recv_data)
 
             sub_data = json.dumps({}) if not sub_data else json.dumps(sub_data)
-            reply = Reply(req_id,get_machine_id(), reply_code, reply_msg, sub_data)
+            reply = Reply(req_id, get_machine_id(), reply_code, reply_msg, sub_data)
 
             msg = protocol.reply_to_raw(reply)
             # print "reply msg: ", msg
