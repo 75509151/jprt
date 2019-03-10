@@ -1,4 +1,5 @@
 import threading
+import signal
 import os
 import subprocess
 import uuid
@@ -13,6 +14,7 @@ from cab.utils.console import embed
 
 log = init_log("utils")
 
+
 def file_lock(lock):
     def handle_func(func):
         def wrap(*args, **kw):
@@ -25,6 +27,16 @@ def file_lock(lock):
                     fcntl.flock(f, fcntl.LOCK_UN)
         return wrap
     return handle_func
+
+
+def run_cmd(cmd, timeout=None):
+    with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid) as process:
+        try:
+            out, stderr  = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGINT)  # send signal to the process group
+            out, stderr = process.communicate()
+        return process.returncode, out, stderr 
 
 
 @file_lock(__file__)
@@ -127,30 +139,25 @@ def get_files(path, suffix=None):
 
 
 def download_file(url, dst, retry=3):
-    cmd = "wget -c  -t 3 --timeout=600 '%s' -O '%s'" % (url, dst)
+    timeout = 600
+    cmd = "wget -c  -t 3 --timeout=%s '%s' -O '%s'" % (timeout, url, dst)
     log.info(cmd)
+    
     for i in range(retry):
-        ret = subprocess.call(cmd, shell=True)
-        if ret == 0:
+        returncode, out, err = run_cmd(cmd, timeout)
+        if returncode == 0:
+            log.info("download success")
             return dst
+
+        log.warning("download failed: (%s) %s" % (returncode, err) )
+
     raise code.DownloadError(url)
-
-def upload_file(src, dst, retry=3, port=22, rename=True):
-    if rename:
-        new_name = str(uuid.uuid4())
-
-    ssh_cmd = "ssh -p %s" % port
-    cmd = "rsync -avz -e '{ssh_cmd}' {src} {dst} ".format(ssh_cmd, src, dst)
-    for i in range(retry):
-        ret = subprocess.call(cmd)
-        if ret == 0:
-            return
-    raise code.UploadError()
 
 
 def make_dirs(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 if __name__ == "__main__":
     embed()

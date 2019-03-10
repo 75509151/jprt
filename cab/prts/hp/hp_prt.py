@@ -11,7 +11,7 @@ from base import device, status, utils, module
 from prnt import cups
 
 from cab.utils.console import embed
-from cab.utils.utils import get_mimetype
+from cab.utils.utils import get_mimetype, run_cmd
 from cab.utils.c_log import init_log
 from cab.prts.prt_exceptions import (PrtSetupError,
                                      DeviceNotFoundError,
@@ -78,7 +78,9 @@ class HpPrinter():
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
         log.info("print cmd: %s" % cmd)
         try:
-            if os.system(cmd) != 0:
+            returncode, out, err = run_cmd(cmd, timeout=120)
+            log.info("return code: %s out: %s, err:%s" % (returncode, out, err))
+            if  returncode or err:
                 raise PrtPrintError("print file error")
         finally:
             if remove:

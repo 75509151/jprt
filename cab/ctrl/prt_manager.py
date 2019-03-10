@@ -8,6 +8,7 @@ from prnt import cups
 from base import device
 
 from cab.utils.c_log import init_log
+from cab.utils.utils import run_cmd
 from cab.db.db_pool import DB_POOL
 from cab.prts.hp.hp_prt import HpPrinter
 from cab.prts.prt_exceptions import PrtSetupError

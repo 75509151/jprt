@@ -24,6 +24,7 @@ from cab.services import code
 from cab.utils.utils import (get_extern_if,
                              run_in_thread,
                              extern_if,
+                             play_video,
                              download_file,
                              get_udisk,
                              get_udisk_path)
@@ -158,6 +159,7 @@ class Controler(object):
             if not os.path.isfile(document):
                 raise code.FileUnEixstError()
 
+            play_video("printing.mp3")
             job = self.prt_manager.print_file(document, num, colorful, sides)
             self.job_queue.put((job, trans_id))
 
