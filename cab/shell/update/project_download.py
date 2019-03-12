@@ -8,10 +8,13 @@ from subprocess import call
 import click
 import os
 
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 import update_exceptions as upex
-import update_utils as upu 
+import update_utils as upu
 from update_info import (REAL_SERVER, TEST_SERVER, UPDATE_FOLDER, UPDATE_PWD_FILE, UPDATE_lOG,
                          DOWNLOAD_LOCK_PATH, REMOTE_UPDATE_BASE_DIR)
 
@@ -54,7 +57,7 @@ class VersionDownload(object):
         cmd = "rsync -az --delete --password-file={pwd_file} {user}@{server}::update/{base_path}/{version}/{src} {dest} ".format(
             pwd_file=self.pwd_file, user=self.user, server=self.server, base_path=REMOTE_UPDATE_BASE_DIR, version=self.version, src=src,
             dest=dest)
-        
+
         ret = call(cmd, shell=True)
         self.log.info("do cmd: %s, ret:%s" % (cmd, ret))
         if ret != 0:
@@ -81,7 +84,7 @@ class VersionDownload(object):
             for try_count in range(retry):
                 try:
                     self._download_project()
-     
+
                     self.cp_project()
                     upu.set_machine_downloaded_version(self.version)
                     self.log.info("[download end]")

@@ -3,7 +3,11 @@ import threading
 import traceback
 import queue
 import time
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import socket
 
 from cab.services import code

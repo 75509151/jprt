@@ -1,6 +1,9 @@
 import os
 import re
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import sqlite3
 from cab.utils.c_log import init_log
 from cab.utils.machine_info import get_machine_id, \

@@ -9,7 +9,10 @@ import hashlib
 import shutil
 import subprocess
 import logging
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import codecs
 import fcntl
 import time

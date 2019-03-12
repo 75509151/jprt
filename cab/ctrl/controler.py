@@ -1,5 +1,8 @@
 import sys
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import queue
 import os
 import time

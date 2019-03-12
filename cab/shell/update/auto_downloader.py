@@ -15,7 +15,10 @@ from update_exceptions import ConfigException
 from update_info import (DOWNLOAD_INTERVAL_SEC, UPDATE_lOG, UPDATE_PWD_FILE,
                          TEST_SERVER, REAL_SERVER, REMOTE_UPDATE_BASE_DIR, REMOTE_VERSION)
 import random
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import datetime
 
 

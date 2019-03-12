@@ -1,7 +1,10 @@
 # coding:utf-8
 import binascii
 import re
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import sys
 import copy
 import struct

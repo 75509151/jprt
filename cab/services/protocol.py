@@ -1,7 +1,10 @@
 import struct
-import json
 import uuid
 import time
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 #                    Configuration.
 # ======================================================

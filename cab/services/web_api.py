@@ -1,5 +1,8 @@
 import requests
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 from cab.utils.machine_info import (get_config, get_machine_id,
                                     get_machine_type,
                                     get_hw_addr)

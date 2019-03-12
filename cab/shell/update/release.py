@@ -14,12 +14,15 @@ import socket
 import traceback
 from subprocess import call
 import datetime
-import json
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import urllib
 
-import update_info as upi 
-import update_utils as upu 
+import update_info as upi
+import update_utils as upu
 
 RELEASE_PWD_FILE = "/tmp/release_pwd"
 
@@ -179,7 +182,7 @@ def rsync_file_to_remote(user, server, src, dest):
     #if dest: dest += "/"
     cmd = "rsync -az --delete --password-file=%s %s %s@%s::update/%s" % (
         RELEASE_PWD_FILE, src, user, server, dest)
-    
+
     ret = call(cmd, shell=True)
     print ("do cmd: %s, ret: %s" % (cmd, ret))
     if ret != 0:

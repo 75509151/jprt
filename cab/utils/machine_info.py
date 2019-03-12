@@ -6,7 +6,10 @@ import fcntl
 import struct
 import os
 import codecs
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import platform
 from urllib.request import urlopen
 from configparser import SafeConfigParser

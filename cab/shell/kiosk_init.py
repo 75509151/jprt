@@ -1,7 +1,10 @@
 import traceback
 import os
 import time
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import sqlite3
 import sys
 

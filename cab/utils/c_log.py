@@ -22,7 +22,10 @@ from .machine_info import (
     get_machine_location,
     get_config
 )
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 
 __all__ = ["merchanical_failure", "status_summary", "inventory_warning", "recycle_bin", "network",
