@@ -80,7 +80,7 @@ class HpPrinter():
         try:
             returncode, out, err = run_cmd(cmd, timeout=120)
             log.info("return code: %s out: %s, err:%s" % (returncode, out, err))
-            if  returncode or err:
+            if  returncode:
                 raise PrtPrintError("print file error")
         finally:
             if remove:

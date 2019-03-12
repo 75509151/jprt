@@ -200,11 +200,11 @@ def set_machine_version(ver):
     """
     set kiosk version
     """
-    version_path = "/home/mm/.machineconfig/latest_version"
+    version_path = "/home/zz/.machineconfig/latest_version"
     if os.path.exists(version_path):
         with open(version_path, 'w') as f:
             f.write(ver)
-        with open("/home/mm/.machineconfig/upgrade_time", 'w') as ff:
+        with open("/home/zz/.machineconfig/upgrade_time", 'w') as ff:
             ff.write(get_cur_time())
 
 
@@ -257,7 +257,7 @@ def get_machine_server(s_type, default_serve=""):
     :param s_type: api, access, update
     :return: ser
     """
-    ser = get_file_content("/home/mm/.machineconfig/machine_" + s_type + "_server")
+    ser = get_file_content("/home/zz/.machineconfig/machine_" + s_type + "_server")
     if not ser:
         set_machine_server(s_type, default_serve)
         ser = default_serve
@@ -265,13 +265,13 @@ def get_machine_server(s_type, default_serve=""):
 
 
 def get_machine_home():
-    return get_file_content("/home/mm/.machineconfig/machine_home")
+    return get_file_content("/home/zz/.machineconfig/machine_home")
 
 
 def get_machine_version():
     """ get the machine version
     """
-    return get_file_content("/home/mm/.machineconfig/latest_version")
+    return get_file_content("/home/zz/.machineconfig/latest_version")
 
 
 if __name__ == '__main__':
