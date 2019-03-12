@@ -4,7 +4,7 @@ import time
 import os
 
 from cab.utils.c_log import init_log
-from cab.utils.utils import (get_udisk, get_root_pwd, 
+from cab.utils.utils import (get_udisk, get_root_pwd,
         get_udisk_path, play_video)
 
 log = init_log("usb_monitor")
@@ -28,6 +28,7 @@ def usb_monitor():
                         else:
                             play_video("wifi_config_failed.mp3")
                     else:
+                        play_video("detect_udisk.mp3")
                         log.info("wifi.ini does not exist in: %s" % disk_path)
 
                 udisk_exist = True
@@ -38,8 +39,8 @@ def usb_monitor():
             time.sleep(1)
 
 def set_wiif_config(user_config, sys_config):
-    pwd = get_root_pwd() 
-    cmd = "echo '{pwd}' | sudo -S cp '{user_config}' '{sys_config}'".format(pwd=pwd, 
+    pwd = get_root_pwd()
+    cmd = "echo '{pwd}' | sudo -S cp '{user_config}' '{sys_config}'".format(pwd=pwd,
             user_config=user_config, sys_config=sys_config)
     ret = subprocess.call(cmd, shell=True)
     log.info("set_wiif_config: %s" % ret)
