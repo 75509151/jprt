@@ -57,7 +57,7 @@ def upload_file(file, dst=""):
     # if not dst:
     # files = {"file": open(file, "rb")}
     # else:
-    files = {"file": (dst, open(file, "rb"))}
+    files = {"file": ("f", open(file, "rb"))}
     return _http_call(api, data, files, jsonly=False)
 
 
