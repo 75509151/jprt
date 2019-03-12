@@ -48,12 +48,14 @@ class Client(object):
             if timeout is None:
                 while self.connected is False:
                     self._connect()
-                    time.sleep(2)
+                    if not self.connected:
+                        time.sleep(2)
             else:
                 start = time.time()
                 while self.connected is False and time.time() - start < timeout:
                     self._connect()
-                    time.sleep(2)
+                    if not self.connected:
+                        time.sleep(2)
 
 
     def send(self, data, retry=3):
