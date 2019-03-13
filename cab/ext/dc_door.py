@@ -95,9 +95,9 @@ class DCDoor(object):
             try:
                 self.ser.flushInput()
                 self.ser.flushOutput()
-                all_data = bean.encode_frame()
+                all_data = bean
                 log.info("tx: %s" % pretty(all_data))
-                self.ser.write(all_data)
+                self.ser.write(all_data.encode())
             except serial.SerialException as e:
                 self.ser = None
                 log.warning(traceback.format_exc())
