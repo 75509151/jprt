@@ -95,9 +95,8 @@ class DCDoor(object):
             try:
                 self.ser.flushInput()
                 self.ser.flushOutput()
-                all_data = bean
-                log.info("tx: %s" % pretty(all_data))
-                self.ser.write(all_data.encode())
+                log.info("tx: %s" % binascii.hexlify(bean))
+                self.ser.write(bean)
             except serial.SerialException as e:
                 self.ser = None
                 log.warning(traceback.format_exc())
@@ -108,9 +107,7 @@ class DCDoor(object):
                 raise e
 
     def open_door(self, door=1, board=1, retry=3):
-        head_part = PACK_STX + chr(board) + chr(door) + CMD_OPEN_DOOR
-        bcc = get_bcc(head_part)
-        data = head_part + bcc
+        data=struct.pack("BBBBB", 0x8a,0x01,0x01, 0x11,0x9b)
         return self.do_cmd(data)
 
 
@@ -119,15 +116,9 @@ class DCDoor(object):
             try:
                 self.send(data)
                 raw_data = self.ser.read(5)
-                log.info("rx: %s" % pretty(raw_data))
+                log.info("rx: %s" % raw_data)
                 if len(raw_data) != 5:
                     continue
-                bcc = get_bcc(raw_data[:-1])
-                if bcc != chr(raw_data[IND_BCC]):
-                    log.info("bcc: %s, %s" % (bcc, raw_data[IND_BCC]))
-                    continue
-                st = ord(raw_data[IND_ST])
-
                 return True
             except serial.SerialException:
                 self.close_serial()
