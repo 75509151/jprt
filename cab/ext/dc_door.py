@@ -60,7 +60,7 @@ class SDCDoor(object):
 
 class DCDoor(object):
 
-    def __init__(self, port="/dev/dc_door", parent=None):
+    def __init__(self, port="/dev/door", parent=None):
         self.port = port
         self.info = {"serial": False}
         self.boudrate = BOUDRATE
@@ -76,7 +76,7 @@ class DCDoor(object):
         if not self.ser:
             try:
                 self.ser = serial.Serial(
-                    self.port, self.boudrate, parity=serial.PARITY_NONE, timeout=0.5)
+                    self.port, self.boudrate, parity=serial.PARITY_NONE, timeout=1)
                 self.info["serial"] = True
 
                 self.ser.flushOutput()
