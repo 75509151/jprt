@@ -70,10 +70,10 @@ class HpPrinter():
         suffix = os.path.splitext(document)[1]
         ms_types = (".doc", ".docx", ".xlsx", ".xls",
                     ".ppt", ".pptx")
-        if suffix == ".pdf" and options.find("-#1 -o sides=one-sided") != -1:
-            cmd = "/usr/local/bin/libreoffice6.2 --headless --invisible --pt '%s' '%s'" % (self.name, document)
+        # if suffix == ".pdf" and options.find("-#1 -o sides=one-sided") != -1:
+            # cmd = "/usr/local/bin/libreoffice6.2 --headless --invisible --pt '%s' '%s'" % (self.name, document)
 
-        elif suffix in ms_types:
+        if suffix in ms_types:
             cmd = "unoconv -T 25 --stdout '{document}' | /usr/bin/lpr {options} -P '{printer}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
