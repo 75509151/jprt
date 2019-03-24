@@ -313,13 +313,13 @@ class Controler(object):
             if test:
                 embed()
             else:
-                interval_time = 5 * 60
+                interval_time = 1*60
                 while not self._stop_event.is_set():
-                    time.sleep(interval_time)
                     try:
                         self.report(status=True)
                     except Exception as e:
                         log.warning(str(e))
+                    time.sleep(interval_time)
 
         except Exception as e:
             log.error("exit unexpect: %s" % str(traceback.format_exc()))
