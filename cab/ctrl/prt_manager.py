@@ -17,6 +17,7 @@ log = init_log("prt_manager")
 
 
 def wait_job_done(job, timeout=60 * 5):
+    #TODO: need op
     start = time.time()
     while time.time() - start < timeout:
         jobs = cups.getJobs()

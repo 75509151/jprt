@@ -31,8 +31,7 @@ class HpPrinter():
         hp_printers = device.getSupportedCUPSPrinters(["hp"])
         for printer in hp_printers:
             if (device_uri is None and name is None) or \
-                    (device_uri and device_uri == printer.device_uri) or\
-                    (name and printer.name == name):
+                    (device_uri and device_uri == printer.device_uri and name and printer.name == name):
                 self.name = printer.name
                 self.device_uri = printer.device_uri
                 break
