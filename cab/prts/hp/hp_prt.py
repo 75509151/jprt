@@ -69,7 +69,7 @@ class HpPrinter():
             raise Exception("not file")
         suffix = os.path.splitext(document)[1]
         ms_types = (".doc", ".docx", ".xlsx", ".xls",
-                    ".ppt", ".pptx", ".pdf")
+                    ".ppt", ".pptx")
         if suffix == ".pdf" and options.find("-#1 -o sides=one-sided") != -1:
             cmd = "/usr/local/bin/libreoffice6.2 --headless --invisible --pt '%s' '%s'" % (self.name, document)
 
