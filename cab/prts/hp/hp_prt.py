@@ -69,7 +69,7 @@ class HpPrinter():
             raise Exception("not file")
         suffix = os.path.splitext(document)[1]
         ms_types = (".doc", ".docx", ".xlsx", ".xls",
-                    ".ppt", ".pptx", "pdf")
+                    ".ppt", ".pptx", ".pdf")
 
         if suffix in ms_types:
             cmd = "unoconv -T 25 --stdout '{document}' | /usr/bin/lpr {options} -P '{printer}'".format(options=options, document=document, printer=self.name)
