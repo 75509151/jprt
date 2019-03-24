@@ -72,7 +72,7 @@ class HpPrinter():
         ms_types = (".doc", ".docx", ".xlsx", ".xls",
                     ".ppt", ".pptx")
 
-        if suffix in ms_types or get_mimetype(document) in ("application/msword", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
+        if suffix in ms_types:
             cmd = "unoconv -T 25 --stdout '{document}' | /usr/bin/lpr {options} -P '{printer}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
