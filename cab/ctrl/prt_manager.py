@@ -106,7 +106,7 @@ class PrtManager(object):
                       "error-state": 0}
         return params, status
 
-    def print_file(self, document, num=1, colorful=False, sides="one-sided"):
+    def print_file(self, document, num=1, colorful=False, sides="one-sided", fit_page=True):
         """
         -o sides=one-sided
             Prints on one side of the paper.
@@ -121,6 +121,9 @@ class PrtManager(object):
             log.info("old jobs len: %s" % len(jobs))
 
             options = "-#{num} -o sides={sides} ".format(num=num, sides=sides)
+            if fit_page:
+                options += " -o fit-to-page"
+
 
             self.printer.print_file(document, options, remove=True)
             jobs = cups.getJobs(completed=0)
