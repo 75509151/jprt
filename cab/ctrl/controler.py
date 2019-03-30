@@ -316,7 +316,7 @@ class Controler(object):
                 interval_time = 1*60
                 while not self._stop_event.is_set():
                     try:
-                        self.report(status=True)
+                        self.report(status=True, force=True)
                     except Exception as e:
                         log.warning(str(e))
                     time.sleep(interval_time)
