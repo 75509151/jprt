@@ -293,7 +293,7 @@ class Controler(object):
             log.info("status: %s" % st)
             if self.prt_st != st["status-code"] or force:
                 for i in range(retry):
-                    res = report_printer_params(st)
+                    res = report_printer_status(st)
                     if res["status"] == 1:
                         self.prt_st = st["status-code"]
                         status_reported = True
