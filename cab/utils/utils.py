@@ -111,7 +111,7 @@ def get_udisk(sub_path="", suffix=None, abs_path=False):
 def get_root_pwd():
     return "cereson121"
 
-
+@run_in_thread
 def play_video(video):
     video_path = os.path.join(PRJ_DIR, "resources", "sounds", video)
 

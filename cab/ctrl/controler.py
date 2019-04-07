@@ -112,6 +112,10 @@ class Controler(object):
                 job, trans_id = self.job_queue.get()
                 job = wait_job_done(job)
                 code = "SUCCESS" if job else "FAILED"
+                if job:
+                    play_video("print_suc.mp3")
+                else:
+                    play_video("print_failed.mp3")
                 _report(trans_id, code)
             except Exception as e:
                 log.warning("jobs report: %s" % str(e))
@@ -157,6 +161,7 @@ class Controler(object):
 
             else:
                 new_file = os.path.join(dst_dir, new_name)
+                play_video("downloading.mp3")
                 document = download_file(doucument_or_url, new_file)
 
             if not os.path.isfile(document):
