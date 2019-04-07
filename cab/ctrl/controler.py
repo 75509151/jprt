@@ -182,7 +182,9 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": "Success"}
         try:
-            if not self.door.open_door():
+            door1 = self.door.open_door(1)
+            door2 = self.door.open_door(2)
+            if not door1 and not door2:
                 sub_data["sub_code"] = 1
                 sub_data["msg"] = "Failed"
         except Exception as e:
