@@ -107,7 +107,11 @@ class DCDoor(object):
                 raise e
 
     def open_door(self, door=1, board=1, retry=3):
-        data=struct.pack("BBBBB", 0x8a,door,0x01, 0x11,0x9b)
+        if door == 1:
+            data=struct.pack("BBBBB", 0x8a, 0x01, 0x01, 0x11,0x9b)
+        else:
+            data=struct.pack("BBBBB", 0x8a, 0x02,0x01, 0x11,0x9b)
+
         return self.do_cmd(data)
 
 
