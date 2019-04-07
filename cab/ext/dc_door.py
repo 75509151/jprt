@@ -48,7 +48,7 @@ def get_bcc(data):
 
 class SDCDoor(object):
 
-    def __init__(self, port="/dev/dc_door"):
+    def __init__(self, port="/dev/ttyS0"):
         self.port = port
 
     def open_door(self, door, board=0, retry=3):
