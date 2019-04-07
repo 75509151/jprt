@@ -161,7 +161,7 @@ class Controler(object):
 
             else:
                 new_file = os.path.join(dst_dir, new_name)
-                play_video("downloading.mp3")
+                # play_video("downloading.mp3")
                 document = download_file(doucument_or_url, new_file)
 
             if not os.path.isfile(document):
