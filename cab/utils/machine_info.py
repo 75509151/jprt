@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+import uuid
 import socket
 import fcntl
 import struct
@@ -58,6 +59,14 @@ def get_machine_id():
 
 def set_machine_id(machine_id):
     set_file_content(get_machine_home() + ".machineconfig/machine_id", machine_id)
+
+def get_machine_uuid():
+    machine_uuid = get_file_content(get_machine_home() +".machineconfig/machine_uuid") 
+    if not machine_uuid:
+        machine_uuid = str(uuid.uuid4())
+        set_file_content(get_machine_home() + ".machineconfig/machine_uuid", machine_uuid)
+
+    return machine_uuid
 
 
 def get_machine_name():

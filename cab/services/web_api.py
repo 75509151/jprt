@@ -5,6 +5,7 @@ except ImportError:
     import json
 from cab.utils.machine_info import (get_config, get_machine_id,
                                     get_machine_type,
+                                    get_machine_uuid,
                                     get_hw_addr)
 from cab.utils.c_log import init_log
 from cab.utils.console import embed
@@ -66,7 +67,7 @@ def register():
 
     machine_id = get_machine_id()
     machine_type = get_machine_type()
-    mac = get_hw_addr()
+    mac = get_machine_uuid()
 
     params = {"id": machine_id,
               "machine_type": machine_type,
