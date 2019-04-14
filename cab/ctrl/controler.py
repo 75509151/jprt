@@ -267,7 +267,7 @@ class Controler(object):
                 status = res["status"]
                 if status == 1:
                     register_id = res.get("machine_id")
-                    if machine_id == "" and register_id != machine_id:
+                    if machine_id == "" or register_id != machine_id:
                         set_machine_id(register_id)
                     return
                 else:
