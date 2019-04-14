@@ -87,7 +87,7 @@ def report_printer_status(status):
     api = "/Api/report_printer_status"
     machine_id = get_machine_id()
     params = {"machine_id": machine_id,
-              "params": status}
+              "status": status}
     return _http_call(api, params)
 
 
