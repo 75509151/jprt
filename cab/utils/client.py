@@ -62,7 +62,7 @@ class Client(object):
         with self.lock:
             try:
                 ret = self.sock.sendall(data)
-                self.log.info("send: %s " % data)
+                self.log.info("send: (%s, %s) " % (ret, data))
                 return ret
             except socket.error as e:
                 self.connected = False

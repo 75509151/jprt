@@ -245,7 +245,7 @@ class Controler(object):
         sub_data = {"sub_code": 0,
                     "msg": []}
         try:
-            path = kw["path"]
+            path = kw["path"] if kw["path"] else ""
         except KeyError as e:
             raise code.MissFieldsErr(str(e))
 
