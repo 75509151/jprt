@@ -63,7 +63,7 @@ class HpPrinter():
     def close(self):
         self.dev.close()
 
-    def print_file(self, document, options='', remove=False):
+    def print_file(self, document, options='', remove=False, use_office=True):
         """黑白彩色，单双面，份数 """
         if not os.path.isfile(document):
             raise Exception("not file")
@@ -73,7 +73,18 @@ class HpPrinter():
         # if suffix == ".pdf" and options.find("-#1 -o sides=one-sided") != -1:
             # cmd = "/usr/local/bin/libreoffice6.2 --headless --invisible --pt '%s' '%s'" % (self.name, document)
 
-        if suffix in ms_types:
+        tmp_document = None
+        if use_office and suffix in ms_types:
+            dst = "/tmp"
+            cmd = "libreoffice --headless --print-to-file --printer-name '{printer}' --outdir {dst} '{document}' ".format(printer=self.name, dst=dst, document=document)
+            returncode, out, err = run_cmd(cmd, timeout=180)
+            log.info("office code: %s, out: %s, err: %s" % (returncode, out,err)) 
+            name = os.path.splitext(document)[0] + '.ps'
+            tmp_document = os.path.join(dst, name)
+            cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=tmp_document)
+
+
+        elif suffix in ms_types:
             cmd = "unoconv -T 25 --stdout '{document}' | /usr/bin/lpr {options} -P '{printer}'".format(options=options, document=document, printer=self.name)
         else:
             cmd = "/usr/bin/lpr {options} -P '{printer}' '{document}'".format(options=options, printer=self.name, document=document)
@@ -85,7 +96,9 @@ class HpPrinter():
                 raise PrtPrintError("print file error")
         finally:
             if remove:
-                os.system("rm %s" % document)
+                os.system("rm '%s'" % document)
+                if tmp_document:
+                    os.system("rm '%s'" % tmp_document)
 
     @staticmethod
     def setup(connection_type="usb"):
