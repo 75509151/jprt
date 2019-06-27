@@ -17,6 +17,9 @@ from configparser import SafeConfigParser
 from cab import PRJ_DIR
 
 
+def get_machine_home():
+    return os.environ["HOME"] + "/"
+
 path = os.path.join(get_machine_home(), ".machineconfig")
 if not os.path.exists(path):
     os.makedirs(path)
@@ -106,8 +109,6 @@ def get_machine_server(s_type, default_serve=""):
     return ser
 
 
-def get_machine_home():
-    return os.environ["HOME"] + "/"
 
 
 def get_machine_version():
