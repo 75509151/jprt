@@ -17,6 +17,9 @@ from configparser import SafeConfigParser
 from cab import PRJ_DIR
 
 
+path = os.path.join(get_machine_home(), ".machineconfig")
+if not os.path.exists(path):
+    os.makedirs(path)
 
 
 def get_machine_type(real=False):
@@ -61,7 +64,7 @@ def set_machine_id(machine_id):
     set_file_content(get_machine_home() + ".machineconfig/machine_id", machine_id)
 
 def get_machine_uuid():
-    machine_uuid = get_file_content(get_machine_home() +".machineconfig/machine_uuid") 
+    machine_uuid = get_file_content(get_machine_home() +".machineconfig/machine_uuid")
     if not machine_uuid:
         machine_uuid = str(uuid.uuid4())
         set_file_content(get_machine_home() + ".machineconfig/machine_uuid", machine_uuid)
