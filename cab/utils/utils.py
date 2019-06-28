@@ -127,7 +127,10 @@ def get_sub_files(path, suffix=None):
     files = [file for file in all_files if os.path.isfile(os.path.join(path, file))]
     dirs = [os.path.join(suffix, dir_name) for dir_name in dirs] if suffix else dirs
     files = [os.path.join(suffix, f) for f in files]  if suffix else files
-    return dirs + files
+    if dirs or files:
+        return dirs + files
+    else:
+        return suffix
 
 
 def get_files(path, suffix=None):
