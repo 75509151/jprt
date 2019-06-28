@@ -36,7 +36,7 @@ def run_cmd(cmd, timeout=None):
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGINT)  # send signal to the process group
             out, stderr = process.communicate()
-        return process.returncode, out, stderr 
+        return process.returncode, out, stderr
 
 
 @file_lock(__file__)
@@ -94,7 +94,7 @@ def get_udisk_path(abs_path=True):
         return udisk_paths
 
 
-def get_udisk(sub_path="", suffix=None, abs_path=False):
+def get_udisk(sub_path=""):
     # TODO: only one udisk exist
     udisk_paths = get_udisk_path()
     if not udisk_paths or len(udisk_paths) > 1:
@@ -105,7 +105,7 @@ def get_udisk(sub_path="", suffix=None, abs_path=False):
     print(udisk_path)
     check_path = os.path.join(udisk_path, sub_path)
     print(check_path)
-    return get_sub_files(check_path)
+    return get_sub_files(check_path, sub_path)
 
 
 def get_root_pwd():
@@ -119,12 +119,14 @@ def play_video(video):
     os.system(cmd)
 
 
-def get_sub_files(path):
+def get_sub_files(path, suffix=None):
     if not os.path.isdir(path):
         return None
     all_files = os.listdir(path)
     dirs = [dir_name + "/" for dir_name in all_files if os.path.isdir(os.path.join(path, dir_name))]
     files = [file for file in all_files if os.path.isfile(os.path.join(path, file))]
+    dirs = [os.path.join(suffix, dir_name) for dir_name in dirs] if suffix else dirs
+    files = [os.path.join(suffix, f) for f in files]  if suffix else files
     return dirs + files
 
 
@@ -142,7 +144,7 @@ def download_file(url, dst, retry=3):
     timeout = 600
     cmd = "wget -c  -t 3 --timeout=%s '%s' -O '%s'" % (timeout, url, dst)
     log.info(cmd)
-    
+
     for i in range(retry):
         returncode, out, err = run_cmd(cmd, timeout)
         if returncode == 0:
