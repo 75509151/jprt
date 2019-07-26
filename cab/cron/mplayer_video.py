@@ -57,10 +57,10 @@ class OmxPlayer(object):
         assert mode in ("full", "mini")
         vol = count_omx_vol(vol_percent)
         if mode == "full":
-            cmd = 'omxplayer -o {output} --vol {vol} --no-osd --aspect-mode stretch {video}'.format(
+            cmd = "omxplayer -o {output} --vol {vol} --no-osd --aspect-mode stretch '{video}'".format(
                 video=video, output=output, vol=vol)
         elif mode == "mini":
-            cmd = 'omxplayer -o {output} --vol {vol} --no-osd --aspect-mode stretch --win {x},{y},{w},{h} {video}'.format(
+            cmd = "omxplayer -o {output} --vol {vol} --no-osd --aspect-mode stretch --win {x},{y},{w},{h} '{video}'".format(
                 x=1, y=mini_omx_y,
                 w=screen_width- wx_width, h=mini_omx_h + mini_omx_y, video=video, output=output, vol=vol)
         if loop:
